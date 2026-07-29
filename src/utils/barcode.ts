@@ -18,7 +18,7 @@ export async function renderBarcodePng(
     text,
     scale: 3,
     height: options?.height ?? 12,
-    width: options?.width,
+    ...(options?.width !== undefined ? { width: options.width } : {}),
     includetext: true,
     textxalign: "center",
     textsize: 10,
