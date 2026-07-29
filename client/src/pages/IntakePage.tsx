@@ -15,7 +15,10 @@ export default function IntakePage() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <Button className="h-24 text-lg font-semibold [&_svg]:size-6">
+        <Button
+          className="h-24 text-lg font-semibold [&_svg]:size-6"
+          onClick={() => navigate("/intake/label")}
+        >
           <PackagePlus className="mr-2" />
           Intake
         </Button>

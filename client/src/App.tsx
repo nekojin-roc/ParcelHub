@@ -4,6 +4,7 @@ import AppLayout from "@/components/AppLayout";
 import DashboardPage from "@/pages/DashboardPage";
 import IntakePage from "@/pages/IntakePage";
 import ManualIntakePage from "@/pages/ManualIntakePage";
+import LabelFirstIntakePage from "@/pages/LabelFirstIntakePage";
 import PickupPage from "@/pages/PickupPage";
 import PackagesPage from "@/pages/PackagesPage";
 import RecipientsPage from "@/pages/RecipientsPage";
@@ -27,6 +28,7 @@ export default function App() {
             <Route index element={<DashboardPage />} />
             <Route path="intake" element={<IntakePage />} />
             <Route path="intake/manual" element={<ManualIntakePage />} />
+            <Route path="intake/label" element={<LabelFirstIntakePage />} />
             <Route path="pickup" element={<PickupPage />} />
             <Route path="packages" element={<PackagesPage />} />
             <Route path="recipients" element={<RecipientsPage />} />

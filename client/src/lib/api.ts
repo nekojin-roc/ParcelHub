@@ -130,7 +130,12 @@ export const api = {
     trackingNumber?: string;
     binId?: string;
     notify?: boolean;
+    barcode?: string;
   }) => request<Package>("/packages/intake", { method: "POST", body: JSON.stringify(data) }),
+  createLabel: () =>
+    request<{ barcode: string; printed: boolean }>("/packages/labels", {
+      method: "POST",
+    }),
   pickup: (barcode: string, data?: { collectedBy?: string; notify?: boolean }) =>
     request<Package>(`/packages/pickup/${barcode}`, {
       method: "POST",
@@ -139,4 +144,7 @@ export const api = {
 
   // Barcode image URL
   barcodeImageUrl: (barcode: string) => `${BASE}/packages/barcode/${barcode}.png`,
+
+  // Label PDF URL (download fallback when no label printer is connected)
+  labelPdfUrl: (barcode: string) => `${BASE}/packages/label/${barcode}.pdf`,
 };

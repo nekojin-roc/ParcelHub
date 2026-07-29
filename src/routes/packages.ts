@@ -5,6 +5,13 @@ import {
   sendArrivalNotification,
   sendPickupConfirmation,
 } from "../services/email.js";
+import {
+  isLabelPrinterConnected,
+  printLabel,
+  renderLabelPdf,
+} from "../services/labelPrinter.js";
+
+const BARCODE_PATTERN = /^PKG-\d{8}-[A-Z0-9]{4}$/;
 
 const intakeSchema = z.object({
   recipientId: z.string().min(1),
@@ -13,6 +20,8 @@ const intakeSchema = z.object({
   trackingNumber: z.string().optional(),
   binId: z.string().optional(),
   notify: z.boolean().default(true),
+  // Pre-generated barcode from the label-first flow; omitted for manual intake
+  barcode: z.string().regex(BARCODE_PATTERN).optional(),
 });
 
 const pickupSchema = z.object({
@@ -72,21 +81,31 @@ export async function packageRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: parsed.error.flatten() });
     }
 
-    const barcode = generateBarcodeId();
     const data = parsed.data;
+    const barcode = data.barcode ?? generateBarcodeId();
 
-    const pkg = await app.prisma.package.create({
-      data: {
-        barcode,
-        description: data.description,
-        orderNumber: data.orderNumber,
-        trackingNumber: data.trackingNumber,
-        recipientId: data.recipientId,
-        binId: data.binId || null,
-        status: "RECEIVED",
-      },
-      include: { recipient: true, bin: true },
-    });
+    let pkg;
+    try {
+      pkg = await app.prisma.package.create({
+        data: {
+          barcode,
+          description: data.description,
+          orderNumber: data.orderNumber,
+          trackingNumber: data.trackingNumber,
+          recipientId: data.recipientId,
+          binId: data.binId || null,
+          status: "RECEIVED",
+        },
+        include: { recipient: true, bin: true },
+      });
+    } catch (err: any) {
+      if (err?.code === "P2002") {
+        return reply
+          .status(409)
+          .send({ error: `Barcode ${barcode} is already registered` });
+      }
+      throw err;
+    }
 
     // Send email notification if requested
     if (data.notify && pkg.recipient.email) {
@@ -163,6 +182,33 @@ export async function packageRoutes(app: FastifyInstance) {
     async (request, reply) => {
       const png = await renderBarcodePng(request.params.barcode);
       return reply.type("image/png").send(png);
+    }
+  );
+
+  // Label-first intake, step 1: generate a barcode and print its label.
+  // No package record is created yet — that happens when the details form
+  // is submitted to /api/packages/intake with this barcode.
+  app.post("/api/packages/labels", async (_request, reply) => {
+    const barcode = generateBarcodeId();
+    const printed = isLabelPrinterConnected()
+      ? await printLabel(barcode)
+      : false;
+    return reply.status(201).send({ barcode, printed });
+  });
+
+  // Label PDF download (fallback when no label printer is connected)
+  app.get<{ Params: { barcode: string } }>(
+    "/api/packages/label/:barcode.pdf",
+    async (request, reply) => {
+      const { barcode } = request.params;
+      if (!BARCODE_PATTERN.test(barcode)) {
+        return reply.status(400).send({ error: "Invalid barcode format" });
+      }
+      const pdf = await renderLabelPdf(barcode);
+      return reply
+        .type("application/pdf")
+        .header("Content-Disposition", `attachment; filename="${barcode}.pdf"`)
+        .send(pdf);
     }
   );
 
