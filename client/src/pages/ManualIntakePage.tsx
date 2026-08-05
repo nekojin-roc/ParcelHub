@@ -4,7 +4,9 @@ import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import PackageDetailsForm from "@/components/PackageDetailsForm";
+import PackageDetailsForm, {
+  type PackageDetails,
+} from "@/components/PackageDetailsForm";
 import { PackagePlus, Printer, Check } from "lucide-react";
 
 export default function ManualIntakePage() {
@@ -12,18 +14,42 @@ export default function ManualIntakePage() {
 
   // Result state after successful intake
   const [result, setResult] = useState<{
+    id: string;
     barcode: string;
     recipientName: string;
     notified: boolean;
+    photoPath?: string | null;
+    photoVersion: number;
+    photoError?: string;
   } | null>(null);
 
   const intakeMutation = useMutation({
-    mutationFn: api.intake,
-    onSuccess: (pkg) => {
+    mutationFn: async ({ photo, ...details }: PackageDetails) => {
+      let pkg = await api.intake(details);
+      let photoError: string | undefined;
+
+      if (photo) {
+        try {
+          pkg = await api.uploadPackagePhoto(pkg.id, photo);
+        } catch (error) {
+          photoError =
+            error instanceof Error
+              ? error.message
+              : "The package was saved, but its photo could not be uploaded.";
+        }
+      }
+
+      return { pkg, photoError };
+    },
+    onSuccess: ({ pkg, photoError }) => {
       setResult({
+        id: pkg.id,
         barcode: pkg.barcode,
         recipientName: pkg.recipient?.name ?? "Unknown",
         notified: pkg.status === "NOTIFIED",
+        photoPath: pkg.photoPath,
+        photoVersion: Date.now(),
+        photoError,
       });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["packages"] });
@@ -81,6 +107,16 @@ export default function ManualIntakePage() {
                 {result.barcode}
               </Badge>
             </div>
+            {result.photoPath && (
+              <img
+                src={api.packagePhotoUrl(result.id, result.photoVersion)}
+                alt={`Package ${result.barcode}`}
+                className="max-h-64 rounded-md object-contain"
+              />
+            )}
+            {result.photoError && (
+              <p className="text-sm text-destructive">{result.photoError}</p>
+            )}
             <div className="flex gap-3">
               <Button
                 variant="outline"

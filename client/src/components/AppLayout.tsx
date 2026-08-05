@@ -6,10 +6,15 @@ import {
   Users,
   Archive,
   Settings,
+  LogOut,
+  PackageSearch,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { authClient, getUserRole } from "@/lib/auth-client";
 
-const navItems = [
+const adminNavItems = [
   { to: "/", icon: LayoutDashboard, label: "Dashboard" },
   { to: "/intake", icon: PackagePlus, label: "Intake" },
   { to: "/pickup", icon: ScanBarcode, label: "Pickup" },
@@ -18,7 +23,20 @@ const navItems = [
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
+const userNavItems = [
+  { to: "/my-packages", icon: PackageSearch, label: "My Packages" },
+];
+
 export default function AppLayout() {
+  const { data: session } = authClient.useSession();
+  const role = getUserRole(session?.user.role);
+  const navItems = role === "ADMIN" ? adminNavItems : userNavItems;
+
+  const signOut = async () => {
+    await authClient.signOut();
+    window.location.assign("/auth");
+  };
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -48,6 +66,23 @@ export default function AppLayout() {
             </NavLink>
           ))}
         </nav>
+        <div className="flex flex-col gap-3 border-t p-3">
+          <div className="min-w-0 px-3">
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-medium">{session?.user.name}</p>
+              <Badge variant="secondary">
+                {role === "ADMIN" ? "Admin" : "User"}
+              </Badge>
+            </div>
+            <p className="truncate text-xs text-muted-foreground">
+              {session?.user.email}
+            </p>
+          </div>
+          <Button variant="ghost" className="justify-start" onClick={signOut}>
+            <LogOut data-icon="inline-start" />
+            Sign out
+          </Button>
+        </div>
       </aside>
 
       {/* Mobile header */}
@@ -74,6 +109,10 @@ export default function AppLayout() {
               {label}
             </NavLink>
           ))}
+          <Button variant="ghost" size="sm" className="ml-auto shrink-0" onClick={signOut}>
+            <LogOut data-icon="inline-start" />
+            Sign out
+          </Button>
         </header>
 
         {/* Main content */}

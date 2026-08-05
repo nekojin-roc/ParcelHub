@@ -9,6 +9,10 @@ import PickupPage from "@/pages/PickupPage";
 import PackagesPage from "@/pages/PackagesPage";
 import RecipientsPage from "@/pages/RecipientsPage";
 import SettingsPage from "@/pages/SettingsPage";
+import AuthPage from "@/pages/AuthPage";
+import RequireAuth from "@/components/RequireAuth";
+import RequireAdmin from "@/components/RequireAdmin";
+import MyPackagesPage from "@/pages/MyPackagesPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,15 +28,21 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayout />}>
-            <Route index element={<DashboardPage />} />
-            <Route path="intake" element={<IntakePage />} />
-            <Route path="intake/manual" element={<ManualIntakePage />} />
-            <Route path="intake/label" element={<LabelFirstIntakePage />} />
-            <Route path="pickup" element={<PickupPage />} />
-            <Route path="packages" element={<PackagesPage />} />
-            <Route path="recipients" element={<RecipientsPage />} />
-            <Route path="settings" element={<SettingsPage />} />
+          <Route path="auth" element={<AuthPage />} />
+          <Route element={<RequireAuth />}>
+            <Route element={<AppLayout />}>
+              <Route path="my-packages" element={<MyPackagesPage />} />
+              <Route element={<RequireAdmin />}>
+                <Route index element={<DashboardPage />} />
+                <Route path="intake" element={<IntakePage />} />
+                <Route path="intake/manual" element={<ManualIntakePage />} />
+                <Route path="intake/label" element={<LabelFirstIntakePage />} />
+                <Route path="pickup" element={<PickupPage />} />
+                <Route path="packages" element={<PackagesPage />} />
+                <Route path="recipients" element={<RecipientsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
+            </Route>
           </Route>
         </Routes>
       </BrowserRouter>

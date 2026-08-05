@@ -5,4 +5,5 @@ prisma/prisma/*.db
 prisma/prisma/*.db-journal
 *.db
 *.db-journal
+uploads/
 *.tsbuildinfo

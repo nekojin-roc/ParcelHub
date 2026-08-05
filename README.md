@@ -8,14 +8,15 @@ distributing packages on behalf of friends and contacts.
 ```
 parcel-hub/
 ├── client/          # React + TypeScript + Vite + shadcn/ui
-├── server/          # Fastify + TypeScript + Prisma + SQLite
+├── src/             # Fastify + TypeScript API
+├── prisma/          # SQLite schema and seed script
 ├── docker-compose.yml
 └── README.md
 ```
 
 ## Prerequisites
 
-- Node.js >= 20.x
+- Node.js >= 20.19
 - npm >= 10.x
 - (Optional) Docker & Docker Compose for containerized deployment
 
@@ -25,22 +26,23 @@ parcel-hub/
 
 ```bash
 # Install server dependencies
-cd server
+cd HomeInventory
 npm install
 
 # Install client dependencies
-cd ../client
+cd client
 npm install
 ```
 
 ### 2. Set up the database
 
 ```bash
-cd server
+cd ..
 
 # Copy the example env file and edit it
 cp .env.example .env
-# Edit .env to configure your SMTP settings for email notifications
+# Edit .env to configure auth and SMTP. Set BETTER_AUTH_SECRET to a long,
+# random value (for example: openssl rand -base64 32).
 
 # Generate Prisma client and create the database
 npx prisma generate
@@ -55,7 +57,7 @@ Open two terminal windows:
 
 ```bash
 # Terminal 1: Start the backend (runs on port 3001)
-cd server
+cd HomeInventory
 npm run dev
 
 # Terminal 2: Start the frontend (runs on port 5173)
@@ -75,9 +77,10 @@ Navigate to http://localhost:5173
 | Backend          | Fastify, TypeScript                             |
 | Database         | SQLite via Prisma ORM                           |
 | Email            | Nodemailer (any SMTP provider)                  |
+| Authentication   | Better Auth (email/password, cookie sessions)   |
 | Barcode Generate | bwip-js                                         |
 | Barcode Scan     | html5-qrcode (camera), HID mode (USB scanner)   |
-| Label Print      | PDF via pdfkit, or browser print dialog          |
+| Package Photos   | Private local files in `uploads/packages/`       |
 
 ## Key Concepts
 
@@ -86,3 +89,19 @@ Navigate to http://localhost:5173
 - **Bins**: Storage locations in your home (shelves, boxes, etc.).
 - **Intake**: The process of logging a new package and notifying the recipient.
 - **Pickup**: Scanning a barcode to mark a package as collected.
+
+## Authentication and photos
+
+- Create the first account at `/auth`, then sign in with email and password.
+  The first (or oldest existing) account is the administrator; later sign-ups
+  are normal users. Roles are assigned by the server and cannot be selected at
+  sign-up.
+- Administrators use the operational dashboard, intake, pickup, recipient,
+  package, and settings pages. Normal users are redirected to **My Packages**,
+  where they can read package status and photos only for the recipient whose
+  email matches their account. Ask an administrator to create or update that
+  recipient if no profile is linked yet.
+- Package photos are optional. The intake form accepts JPEG, PNG, and WebP
+  images up to 5 MB; they can be replaced or deleted after registration.
+  Files are stored outside the database and served only through authenticated
+  package-photo endpoints. Set `UPLOAD_DIR` to choose a different storage root.

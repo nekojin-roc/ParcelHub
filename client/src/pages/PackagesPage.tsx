@@ -95,6 +95,13 @@ export default function PackagesPage() {
             return (
               <Card key={pkg.id}>
                 <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                  {pkg.photoPath && (
+                    <img
+                      src={api.packagePhotoUrl(pkg.id, pkg.photoPath)}
+                      alt=""
+                      className="size-14 rounded-md border object-cover"
+                    />
+                  )}
                   {/* Barcode + description */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">

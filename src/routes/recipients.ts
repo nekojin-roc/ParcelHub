@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { removePackagePhoto } from "../services/package-photo.js";
 
 const createRecipientSchema = z.object({
   name: z.string().min(1),
@@ -70,21 +71,77 @@ export async function recipientRoutes(app: FastifyInstance) {
     }
   );
 
-  // Delete recipient (only if no packages)
+  // Delete recipient only when every package has already been picked up.
   app.delete<{ Params: { id: string } }>(
     "/api/recipients/:id",
     async (request, reply) => {
-      const count = await app.prisma.package.count({
-        where: { recipientId: request.params.id },
+      const result = await app.prisma.$transaction(async (prisma) => {
+        const recipient = await prisma.recipient.findUnique({
+          where: { id: request.params.id },
+          select: { id: true },
+        });
+
+        if (!recipient) return { outcome: "not-found" as const };
+
+        const waitingPackageCount = await prisma.package.count({
+          where: {
+            recipientId: request.params.id,
+            status: { not: "PICKED_UP" },
+          },
+        });
+
+        if (waitingPackageCount > 0) {
+          return { outcome: "has-waiting-packages" as const };
+        }
+
+        const completedPackages = await prisma.package.findMany({
+          where: {
+            recipientId: request.params.id,
+            status: "PICKED_UP",
+          },
+          select: { photoPath: true },
+        });
+
+        await prisma.package.deleteMany({
+          where: {
+            recipientId: request.params.id,
+            status: "PICKED_UP",
+          },
+        });
+        await prisma.recipient.delete({
+          where: { id: request.params.id },
+        });
+
+        return {
+          outcome: "deleted" as const,
+          photoPaths: completedPackages.flatMap(({ photoPath }) =>
+            photoPath ? [photoPath] : []
+          ),
+        };
       });
-      if (count > 0) {
+
+      if (result.outcome === "not-found") {
+        return reply.status(404).send({ error: "Not found" });
+      }
+
+      if (result.outcome === "has-waiting-packages") {
         return reply.status(409).send({
           error: "Cannot delete recipient with existing packages",
         });
       }
-      await app.prisma.recipient.delete({
-        where: { id: request.params.id },
+
+      const photoCleanupResults = await Promise.allSettled(
+        result.photoPaths.map(removePackagePhoto)
+      );
+      photoCleanupResults.forEach((cleanupResult) => {
+        if (cleanupResult.status === "rejected") {
+          app.log.warn(
+            { error: cleanupResult.reason, recipientId: request.params.id },
+            "Unable to remove a package photo after deleting its recipient"
+          );
+        }
       });
+
       return reply.status(204).send();
     }
   );

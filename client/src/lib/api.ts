@@ -25,12 +25,17 @@ async function request<T>(
   path: string,
   options?: RequestInit
 ): Promise<T> {
+  const isFormData =
+    typeof FormData !== "undefined" && options?.body instanceof FormData;
   const res = await fetch(`${BASE}${path}`, {
     ...options,
+    credentials: "include",
     headers: {
       // Only send a JSON content-type when there's actually a body —
       // Fastify rejects an empty body with content-type application/json.
-      ...(options?.body ? { "Content-Type": "application/json" } : {}),
+      ...(options?.body && !isFormData
+        ? { "Content-Type": "application/json" }
+        : {}),
       ...options?.headers,
     },
   });
@@ -87,9 +92,17 @@ export interface DashboardStats {
   byRecipient: { recipientId: string; recipientName: string; count: number }[];
 }
 
+export interface MyPackagesResponse {
+  recipient: Pick<Recipient, "id" | "name" | "email"> | null;
+  packages: Package[];
+}
+
 // ----- API Functions -----
 
 export const api = {
+  // Normal user portal
+  myPackages: () => request<MyPackagesResponse>("/my/packages"),
+
   // Dashboard
   dashboard: () => request<DashboardStats>("/dashboard"),
 
@@ -142,9 +155,22 @@ export const api = {
       body: JSON.stringify(data ?? {}),
     }),
 
+  uploadPackagePhoto: async (id: string, photo: File) => {
+    const formData = new FormData();
+    formData.set("photo", photo);
+    return request<Package>(`/packages/${id}/photo`, {
+      method: "POST",
+      body: formData,
+    });
+  },
+  deletePackagePhoto: (id: string) =>
+    request<Package>(`/packages/${id}/photo`, { method: "DELETE" }),
+
   // Barcode image URL
   barcodeImageUrl: (barcode: string) => `${BASE}/packages/barcode/${barcode}.png`,
 
   // Label PDF URL (download fallback when no label printer is connected)
   labelPdfUrl: (barcode: string) => `${BASE}/packages/label/${barcode}.pdf`,
+  packagePhotoUrl: (id: string, version?: string | number) =>
+    `${BASE}/packages/${id}/photo${version ? `?v=${encodeURIComponent(String(version))}` : ""}`,
 };

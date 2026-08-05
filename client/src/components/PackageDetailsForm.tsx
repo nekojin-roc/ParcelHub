@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,17 @@ export interface PackageDetails {
   trackingNumber?: string;
   binId?: string;
   notify: boolean;
+  photo?: File;
+}
+
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+function photoValidationError(photo: File): string | null {
+  if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(photo.type)) {
+    return "Choose a JPEG, PNG, or WebP image.";
+  }
+  if (photo.size > MAX_PHOTO_BYTES) return "Photo must be 5 MB or smaller.";
+  return null;
 }
 
 interface PackageDetailsFormProps {
@@ -41,6 +52,8 @@ export default function PackageDetailsForm({
   const [trackingNumber, setTrackingNumber] = useState("");
   const [binId, setBinId] = useState("");
   const [notify, setNotify] = useState(true);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
 
   const { data: recipients } = useQuery({
     queryKey: ["recipients"],
@@ -61,7 +74,21 @@ export default function PackageDetailsForm({
       trackingNumber: trackingNumber || undefined,
       binId: binId || undefined,
       notify,
+      photo: photo ?? undefined,
     });
+  };
+
+  const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selectedPhoto = event.target.files?.[0] ?? null;
+    if (!selectedPhoto) {
+      setPhoto(null);
+      setPhotoError(null);
+      return;
+    }
+
+    const validationError = photoValidationError(selectedPhoto);
+    setPhoto(validationError ? null : selectedPhoto);
+    setPhotoError(validationError);
   };
 
   return (
@@ -111,6 +138,26 @@ export default function PackageDetailsForm({
           value={trackingNumber}
           onChange={(e) => setTrackingNumber(e.target.value)}
         />
+      </div>
+
+      {/* Photo */}
+      <div className="space-y-2">
+        <Label htmlFor="package-photo">Package Photo</Label>
+        <Input
+          id="package-photo"
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          onChange={handlePhotoChange}
+        />
+        <p className="text-xs text-muted-foreground">
+          Optional. JPEG, PNG, or WebP up to 5 MB.
+        </p>
+        {photo && (
+          <p className="text-xs text-muted-foreground">
+            Selected: {photo.name}
+          </p>
+        )}
+        {photoError && <p className="text-sm text-destructive">{photoError}</p>}
       </div>
 
       {/* Bin */}
