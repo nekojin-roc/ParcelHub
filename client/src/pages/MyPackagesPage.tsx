@@ -134,8 +134,8 @@ export default function MyPackagesPage() {
           <CardHeader>
             <CardTitle>No recipient profile linked</CardTitle>
             <CardDescription>
-              Ask an administrator to create a recipient using the same email
-              address as this account. Your packages will appear here automatically.
+              Ask an administrator to link this account to your recipient
+              profile. Your packages will appear here after it is connected.
             </CardDescription>
           </CardHeader>
         </Card>

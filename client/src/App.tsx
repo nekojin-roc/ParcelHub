@@ -8,6 +8,7 @@ import LabelFirstIntakePage from "@/pages/LabelFirstIntakePage";
 import PickupPage from "@/pages/PickupPage";
 import PackagesPage from "@/pages/PackagesPage";
 import RecipientsPage from "@/pages/RecipientsPage";
+import RegisteredUsersPage from "@/pages/RegisteredUsersPage";
 import SettingsPage from "@/pages/SettingsPage";
 import AuthPage from "@/pages/AuthPage";
 import RequireAuth from "@/components/RequireAuth";
@@ -40,6 +41,7 @@ export default function App() {
                 <Route path="pickup" element={<PickupPage />} />
                 <Route path="packages" element={<PackagesPage />} />
                 <Route path="recipients" element={<RecipientsPage />} />
+                <Route path="users" element={<RegisteredUsersPage />} />
                 <Route path="settings" element={<SettingsPage />} />
               </Route>
             </Route>

@@ -1,8 +1,7 @@
 node_modules/
 dist/
 .env
-prisma/prisma/*.db
-prisma/prisma/*.db-journal
+prisma/prisma/*.db*
 *.db
 *.db-journal
 uploads/

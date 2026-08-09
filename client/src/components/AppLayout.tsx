@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   PackageSearch,
+  UserRoundCog,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ const adminNavItems = [
   { to: "/pickup", icon: ScanBarcode, label: "Pickup" },
   { to: "/packages", icon: Archive, label: "Packages" },
   { to: "/recipients", icon: Users, label: "Recipients" },
+  { to: "/users", icon: UserRoundCog, label: "Users" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 

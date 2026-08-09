@@ -6,6 +6,7 @@ import { recipientRoutes } from "./routes/recipients.js";
 import { packageRoutes } from "./routes/packages.js";
 import { binRoutes } from "./routes/bins.js";
 import { userRoutes } from "./routes/user.js";
+import { adminUserRoutes } from "./routes/admin-users.js";
 import { auth, ensureAdminExists } from "./auth.js";
 import { requireAuth } from "./utils/auth-guard.js";
 import { fromNodeHeaders } from "better-auth/node";
@@ -67,6 +68,7 @@ await app.register(recipientRoutes);
 await app.register(packageRoutes);
 await app.register(binRoutes);
 await app.register(userRoutes);
+await app.register(adminUserRoutes);
 
 // Health check
 app.get("/api/health", async () => ({ status: "ok" }));

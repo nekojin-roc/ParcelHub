@@ -97,10 +97,10 @@ Navigate to http://localhost:5173
   are normal users. Roles are assigned by the server and cannot be selected at
   sign-up.
 - Administrators use the operational dashboard, intake, pickup, recipient,
-  package, and settings pages. Normal users are redirected to **My Packages**,
-  where they can read package status and photos only for the recipient whose
-  email matches their account. Ask an administrator to create or update that
-  recipient if no profile is linked yet.
+  user, package, and settings pages. The **Registered Users** page links each
+  account to one recipient profile. Normal users are redirected to **My
+  Packages**, where they can read package status and photos only for their
+  linked recipient.
 - Package photos are optional. The intake form accepts JPEG, PNG, and WebP
   images up to 5 MB; they can be replaced or deleted after registration.
   Files are stored outside the database and served only through authenticated

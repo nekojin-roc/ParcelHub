@@ -97,11 +97,33 @@ export interface MyPackagesResponse {
   packages: Package[];
 }
 
+export interface RegisteredUser {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  role: "ADMIN" | "USER";
+  createdAt: string;
+  recipient: Pick<Recipient, "id" | "name" | "email"> | null;
+}
+
 // ----- API Functions -----
 
 export const api = {
   // Normal user portal
   myPackages: () => request<MyPackagesResponse>("/my/packages"),
+
+  // Registered users (admin only)
+  listRegisteredUsers: () =>
+    request<RegisteredUser[]>("/admin/users"),
+  updateRegisteredUserRecipient: (
+    userId: string,
+    recipientId: string | null
+  ) =>
+    request<RegisteredUser>(`/admin/users/${userId}/recipient`, {
+      method: "PATCH",
+      body: JSON.stringify({ recipientId }),
+    }),
 
   // Dashboard
   dashboard: () => request<DashboardStats>("/dashboard"),

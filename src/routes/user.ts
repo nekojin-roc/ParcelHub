@@ -5,10 +5,15 @@ export async function userRoutes(app: FastifyInstance) {
     "/api/my/packages",
     { config: { allowNormalUser: true } },
     async (request) => {
-      const recipient = await app.prisma.recipient.findUnique({
-        where: { email: request.authUser.email },
-        select: { id: true, name: true, email: true },
+      const user = await app.prisma.user.findUnique({
+        where: { id: request.authUser.id },
+        select: {
+          recipient: {
+            select: { id: true, name: true, email: true },
+          },
+        },
       });
+      const recipient = user?.recipient ?? null;
 
       if (!recipient) return { recipient: null, packages: [] };
 
