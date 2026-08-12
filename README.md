@@ -26,7 +26,7 @@ parcel-hub/
 
 ```bash
 # Install server dependencies
-cd HomeInventory
+cd ParcelHub
 npm install
 
 # Install client dependencies
@@ -57,7 +57,7 @@ Open two terminal windows:
 
 ```bash
 # Terminal 1: Start the backend (runs on port 3001)
-cd HomeInventory
+cd ParcelHub
 npm run dev
 
 # Terminal 2: Start the frontend (runs on port 5173)
