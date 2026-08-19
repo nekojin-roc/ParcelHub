@@ -1,5 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
+import { generateReferralCode } from "../utils/referral-code.js";
 
 const updateRecipientSchema = z.object({
   recipientId: z.string().min(1).nullable(),
@@ -12,6 +13,52 @@ const registeredUserInclude = {
 } as const;
 
 export async function adminUserRoutes(app: FastifyInstance) {
+  app.get("/api/admin/referral-codes", async () => {
+    return app.prisma.referralCode.findMany({
+      where: {
+        usedAt: null,
+        usedBy: null,
+      },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        code: true,
+        createdAt: true,
+        createdBy: {
+          select: { id: true, name: true, email: true },
+        },
+      },
+    });
+  });
+
+  app.post("/api/admin/referral-codes", async (request, reply) => {
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      try {
+        const referralCode = await app.prisma.referralCode.create({
+          data: {
+            code: generateReferralCode(),
+            createdById: request.authUser.id,
+          },
+          select: {
+            id: true,
+            code: true,
+            createdAt: true,
+            createdBy: {
+              select: { id: true, name: true, email: true },
+            },
+          },
+        });
+        return reply.status(201).send(referralCode);
+      } catch (error) {
+        if ((error as { code?: string }).code !== "P2002") throw error;
+      }
+    }
+
+    return reply.status(503).send({
+      error: "Unable to generate a unique referral code. Please try again.",
+    });
+  });
+
   app.get("/api/admin/users", async () => {
     return app.prisma.user.findMany({
       orderBy: { createdAt: "desc" },

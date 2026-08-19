@@ -15,6 +15,11 @@ export const authClient = createAuthClient({
           required: false,
           input: false,
         },
+        referralCode: {
+          type: "string",
+          required: false,
+          input: true,
+        },
       },
     }),
   ],

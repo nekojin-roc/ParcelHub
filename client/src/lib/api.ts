@@ -107,6 +107,13 @@ export interface RegisteredUser {
   recipient: Pick<Recipient, "id" | "name" | "email"> | null;
 }
 
+export interface ReferralCode {
+  id: string;
+  code: string;
+  createdAt: string;
+  createdBy: Pick<RegisteredUser, "id" | "name" | "email">;
+}
+
 // ----- API Functions -----
 
 export const api = {
@@ -124,6 +131,10 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ recipientId }),
     }),
+  listReferralCodes: () =>
+    request<ReferralCode[]>("/admin/referral-codes"),
+  createReferralCode: () =>
+    request<ReferralCode>("/admin/referral-codes", { method: "POST" }),
 
   // Dashboard
   dashboard: () => request<DashboardStats>("/dashboard"),

@@ -111,7 +111,7 @@ export default function ManualIntakePage() {
               <img
                 src={api.packagePhotoUrl(result.id, result.photoVersion)}
                 alt={`Package ${result.barcode}`}
-                className="max-h-64 rounded-md object-contain"
+                className="mx-auto max-h-64 max-w-full rounded-md object-contain"
               />
             )}
             {result.photoError && (

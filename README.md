@@ -51,7 +51,15 @@ npx prisma db push
 npx prisma db seed
 ```
 
-### 3. Start development servers
+### 3. Start Mailpit and development servers
+
+Start the local email catcher. Its inbox is available at
+http://localhost:8025, and ParcelHub sends development mail to its SMTP port
+at `localhost:1025`.
+
+```bash
+npm run mail:up
+```
 
 Open two terminal windows:
 
@@ -69,6 +77,11 @@ npm run dev
 
 Navigate to http://localhost:5173
 
+New accounts receive one verification message after signup. Verification does
+not block sign-in and is not re-sent during sign-in. Password-reset links are
+also delivered to Mailpit. Stop Mailpit with `npm run mail:down` when it is no
+longer needed.
+
 ## Tech Stack
 
 | Layer            | Technology                                      |
@@ -76,7 +89,7 @@ Navigate to http://localhost:5173
 | Frontend         | React 19, TypeScript, Vite, shadcn/ui, Tailwind |
 | Backend          | Fastify, TypeScript                             |
 | Database         | SQLite via Prisma ORM                           |
-| Email            | Nodemailer (any SMTP provider)                  |
+| Email            | Nodemailer; Mailpit for local development       |
 | Authentication   | Better Auth (email/password, cookie sessions)   |
 | Barcode Generate | bwip-js                                         |
 | Barcode Scan     | html5-qrcode (camera), HID mode (USB scanner)   |
@@ -96,6 +109,13 @@ Navigate to http://localhost:5173
   The first (or oldest existing) account is the administrator; later sign-ups
   are normal users. Roles are assigned by the server and cannot be selected at
   sign-up.
+- The first account can register without a referral code so a clean install can
+  bootstrap its administrator. After that, registration requires an active,
+  single-use referral code. Administrators generate and view active codes on
+  the **Registered Users** page; each code leaves the active list when used.
+- Account creation sends a one-time verification email, but verification is
+  not required for sign-in. The sign-in page also provides a password-reset
+  flow; completing it revokes the account's existing sessions.
 - Administrators use the operational dashboard, intake, pickup, recipient,
   user, package, and settings pages. The **Registered Users** page links each
   account to one recipient profile. Normal users are redirected to **My

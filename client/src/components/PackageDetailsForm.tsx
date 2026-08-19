@@ -7,10 +7,12 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import RecipientRequiredTooltip from "@/components/RecipientRequiredTooltip";
 import { PackagePlus, Loader2 } from "lucide-react";
 
 export interface PackageDetails {
@@ -55,10 +57,20 @@ export default function PackageDetailsForm({
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
 
-  const { data: recipients } = useQuery({
+  const recipientsQuery = useQuery({
     queryKey: ["recipients"],
     queryFn: api.listRecipients,
   });
+  const recipients = recipientsQuery.data ?? [];
+  const noRecipients =
+    !recipientsQuery.isLoading &&
+    !recipientsQuery.isError &&
+    recipients.length === 0;
+  const recipientUnavailableMessage = recipientsQuery.isError
+    ? "Unable to check recipients. Refresh the page and try again."
+    : noRecipients
+      ? "Add a recipient on the Recipients page before adding a package."
+      : undefined;
 
   const { data: bins } = useQuery({
     queryKey: ["bins"],
@@ -96,16 +108,26 @@ export default function PackageDetailsForm({
       {/* Recipient */}
       <div className="space-y-2">
         <Label>Recipient *</Label>
-        <Select value={recipientId} onValueChange={setRecipientId}>
+        <Select
+          value={recipientId}
+          onValueChange={setRecipientId}
+          disabled={
+            recipientsQuery.isLoading ||
+            recipientsQuery.isError ||
+            noRecipients
+          }
+        >
           <SelectTrigger>
             <SelectValue placeholder="Select recipient..." />
           </SelectTrigger>
           <SelectContent>
-            {recipients?.map((r) => (
-              <SelectItem key={r.id} value={r.id}>
-                {r.name}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {recipients.map((r) => (
+                <SelectItem key={r.id} value={r.id}>
+                  {r.name}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
@@ -168,15 +190,17 @@ export default function PackageDetailsForm({
             <SelectValue placeholder="Select bin..." />
           </SelectTrigger>
           <SelectContent>
-            {bins?.map((b) => (
-              <SelectItem key={b.id} value={b.id}>
-                {b.label}
-                {b.description ? ` — ${b.description}` : ""}
-                {b.currentCount !== undefined
-                  ? ` (${b.currentCount}/${b.capacity})`
-                  : ""}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {bins?.map((b) => (
+                <SelectItem key={b.id} value={b.id}>
+                  {b.label}
+                  {b.description ? ` — ${b.description}` : ""}
+                  {b.currentCount !== undefined
+                    ? ` (${b.currentCount}/${b.capacity})`
+                    : ""}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
@@ -199,19 +223,27 @@ export default function PackageDetailsForm({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {/* Submit */}
-      <Button
-        className="w-full"
-        size="lg"
-        disabled={!recipientId || isPending}
-        onClick={handleSubmit}
-      >
-        {isPending ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : (
-          <PackagePlus className="mr-2 h-4 w-4" />
-        )}
-        {submitLabel}
-      </Button>
+      <RecipientRequiredTooltip message={recipientUnavailableMessage}>
+        <Button
+          className="w-full"
+          size="lg"
+          disabled={
+            !recipientId ||
+            isPending ||
+            recipientsQuery.isLoading ||
+            recipientsQuery.isError ||
+            noRecipients
+          }
+          onClick={handleSubmit}
+        >
+          {isPending ? (
+            <Loader2 data-icon="inline-start" className="animate-spin" />
+          ) : (
+            <PackagePlus data-icon="inline-start" />
+          )}
+          {submitLabel}
+        </Button>
+      </RecipientRequiredTooltip>
     </div>
   );
 }

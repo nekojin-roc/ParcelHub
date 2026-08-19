@@ -64,7 +64,7 @@ There are no tests configured.
 
 ### Database Schema (SQLite via Prisma)
 
-Three models: `Recipient` → `Package` (one-to-many), `Bin` → `Package` (one-to-many optional). Package has `status` field (`RECEIVED` | `NOTIFIED` | `PICKED_UP`) and indexed fields `barcode`, `status`, `recipientId`.
+Core package models are `Recipient` → `Package` (one-to-many) and `Bin` → `Package` (one-to-many optional). Better Auth owns `User`, `Session`, `Account`, and `Verification`; `ReferralCode` records administrator-generated, single-use registration codes. Package has a `status` field (`RECEIVED` | `NOTIFIED` | `PICKED_UP`) and indexed fields `barcode`, `status`, and `recipientId`.
 
 ## Environment Variables
 
@@ -76,12 +76,12 @@ Configure via `.env` in the server root:
 | `HOST` | `0.0.0.0` | Server host |
 | `CLIENT_URL` | `http://localhost:5173` | CORS origin |
 | `DATABASE_URL` | `file:./prisma/parcel-hub.db` | SQLite path |
-| `SMTP_HOST` | `smtp.gmail.com` | Email server |
-| `SMTP_PORT` | `587` | Email port |
+| `SMTP_HOST` | `127.0.0.1` | Email server (Mailpit in development) |
+| `SMTP_PORT` | `1025` | Email port |
 | `SMTP_SECURE` | `false` | TLS flag |
 | `SMTP_USER` | — | Email account |
 | `SMTP_PASS` | — | Email password |
-| `SMTP_FROM` | `SMTP_USER` | From address |
+| `SMTP_FROM` | `ParcelHub <no-reply@parcelhub.local>` | From address |
 
 ## Docker
 

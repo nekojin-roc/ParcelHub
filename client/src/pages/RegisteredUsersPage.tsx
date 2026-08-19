@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link2, LoaderCircle, UserRound } from "lucide-react";
-import { api, type Recipient, type RegisteredUser } from "@/lib/api";
+import { Link2, LoaderCircle, TicketPlus, UserRound } from "lucide-react";
+import {
+  api,
+  type Recipient,
+  type ReferralCode,
+  type RegisteredUser,
+} from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +30,72 @@ const UNASSIGNED = "__unassigned__";
 
 function formatDate(value: string): string {
   return new Date(value).toLocaleDateString();
+}
+
+function ReferralCodesCard({
+  codes,
+  isLoading,
+  isGenerating,
+  onGenerate,
+}: {
+  codes: ReferralCode[];
+  isLoading: boolean;
+  isGenerating: boolean;
+  onGenerate: () => void;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle>Referral codes</CardTitle>
+            <CardDescription>
+              Generate a single-use code for a new account. Used codes leave
+              this list automatically.
+            </CardDescription>
+          </div>
+          <Button onClick={onGenerate} disabled={isGenerating}>
+            {isGenerating ? (
+              <LoaderCircle data-icon="inline-start" className="animate-spin" />
+            ) : (
+              <TicketPlus data-icon="inline-start" />
+            )}
+            Generate code
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <p className="text-sm text-muted-foreground">
+            Loading active referral codes...
+          </p>
+        ) : codes.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No active referral codes.
+          </p>
+        ) : (
+          <div className="flex flex-col divide-y rounded-lg border">
+            {codes.map((code) => (
+              <div
+                key={code.id}
+                className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex items-center gap-3">
+                  <code className="font-mono text-sm font-semibold">
+                    {code.code}
+                  </code>
+                  <Badge variant="outline">Active</Badge>
+                </div>
+                <span className="text-xs text-muted-foreground">
+                  Generated {formatDate(code.createdAt)} by {code.createdBy.name}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }
 
 function RegisteredUserCard({
@@ -136,6 +207,18 @@ export default function RegisteredUsersPage() {
     queryKey: ["recipients"],
     queryFn: api.listRecipients,
   });
+  const referralCodesQuery = useQuery({
+    queryKey: ["referral-codes"],
+    queryFn: api.listReferralCodes,
+    refetchInterval: 10_000,
+  });
+
+  const referralCodeMutation = useMutation({
+    mutationFn: api.createReferralCode,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["referral-codes"] });
+    },
+  });
 
   const linkMutation = useMutation({
     mutationFn: ({
@@ -160,7 +243,12 @@ export default function RegisteredUsersPage() {
       ),
     [users]
   );
-  const error = usersQuery.error ?? recipientsQuery.error ?? linkMutation.error;
+  const error =
+    usersQuery.error ??
+    recipientsQuery.error ??
+    referralCodesQuery.error ??
+    linkMutation.error ??
+    referralCodeMutation.error;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -170,6 +258,13 @@ export default function RegisteredUsersPage() {
           View account access and connect each account to a recipient profile.
         </p>
       </div>
+
+      <ReferralCodesCard
+        codes={referralCodesQuery.data ?? []}
+        isLoading={referralCodesQuery.isLoading}
+        isGenerating={referralCodeMutation.isPending}
+        onGenerate={() => referralCodeMutation.mutate()}
+      />
 
       {error && (
         <Card>

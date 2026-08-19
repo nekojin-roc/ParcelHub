@@ -11,6 +11,8 @@ import RecipientsPage from "@/pages/RecipientsPage";
 import RegisteredUsersPage from "@/pages/RegisteredUsersPage";
 import SettingsPage from "@/pages/SettingsPage";
 import AuthPage from "@/pages/AuthPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import RequireAuth from "@/components/RequireAuth";
 import RequireAdmin from "@/components/RequireAdmin";
 import MyPackagesPage from "@/pages/MyPackagesPage";
@@ -30,6 +32,8 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           <Route path="auth" element={<AuthPage />} />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="reset-password" element={<ResetPasswordPage />} />
           <Route element={<RequireAuth />}>
             <Route element={<AppLayout />}>
               <Route path="my-packages" element={<MyPackagesPage />} />

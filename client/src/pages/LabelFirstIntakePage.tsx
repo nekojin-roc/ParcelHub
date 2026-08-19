@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import PackageDetailsForm, {
   type PackageDetails,
 } from "@/components/PackageDetailsForm";
+import RecipientRequiredTooltip from "@/components/RecipientRequiredTooltip";
 import { PackagePlus, Check, Loader2, FileDown, Printer } from "lucide-react";
 
 type LabelIntakeDetails = PackageDetails & { barcode: string };
@@ -16,6 +17,18 @@ type LabelIntakeDetails = PackageDetails & { barcode: string };
 // the details form is submitted.
 export default function LabelFirstIntakePage() {
   const queryClient = useQueryClient();
+  const recipientsQuery = useQuery({
+    queryKey: ["recipients"],
+    queryFn: api.listRecipients,
+  });
+  const hasRecipients = (recipientsQuery.data?.length ?? 0) > 0;
+  const labelUnavailable =
+    recipientsQuery.isLoading || recipientsQuery.isError || !hasRecipients;
+  const unavailableMessage = recipientsQuery.isError
+    ? "Unable to check recipients. Refresh the page and try again."
+    : !recipientsQuery.isLoading && !hasRecipients
+      ? "Add a recipient on the Recipients page before printing a package label."
+      : undefined;
 
   const [label, setLabel] = useState<{
     barcode: string;
@@ -118,7 +131,7 @@ export default function LabelFirstIntakePage() {
               <img
                 src={api.packagePhotoUrl(result.id, result.photoVersion)}
                 alt={`Package ${result.barcode}`}
-                className="max-h-64 rounded-md object-contain"
+                className="mx-auto max-h-64 max-w-full rounded-md object-contain"
               />
             )}
             {result.photoError && (
@@ -197,18 +210,20 @@ export default function LabelFirstIntakePage() {
         </p>
       </div>
 
-      <Button
-        className="w-full h-24 text-lg font-semibold [&_svg]:size-6"
-        disabled={labelMutation.isPending}
-        onClick={() => labelMutation.mutate()}
-      >
-        {labelMutation.isPending ? (
-          <Loader2 className="mr-2 animate-spin" />
-        ) : (
-          <Printer className="mr-2" />
-        )}
-        Print Label
-      </Button>
+      <RecipientRequiredTooltip message={unavailableMessage}>
+        <Button
+          className="h-24 w-full text-lg font-semibold [&_svg]:size-6"
+          disabled={labelMutation.isPending || labelUnavailable}
+          onClick={() => labelMutation.mutate()}
+        >
+          {labelMutation.isPending ? (
+            <Loader2 data-icon="inline-start" className="animate-spin" />
+          ) : (
+            <Printer data-icon="inline-start" />
+          )}
+          Print Label
+        </Button>
+      </RecipientRequiredTooltip>
 
       {labelMutation.isError && (
         <p className="text-sm text-destructive">
