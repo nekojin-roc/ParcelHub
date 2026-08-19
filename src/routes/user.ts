@@ -22,7 +22,7 @@ export async function userRoutes(app: FastifyInstance) {
         orderBy: { receivedAt: "desc" },
         include: {
           recipient: { select: { id: true, name: true, email: true } },
-          bin: { select: { id: true, label: true } },
+          bin: { select: { id: true, label: true, isDefault: true } },
         },
       });
 

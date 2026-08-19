@@ -28,8 +28,9 @@ they live under `scripts/` in this working copy:
 # backend plus frontend development servers.
 ./scripts/run-local.sh
 
-# Back up the current SQLite database and uploads, then create a migrated,
-# completely empty local database. Interactive use requires typing RESET.
+# Back up the current SQLite database and uploads, then create a migrated
+# database with no user data and only the required Uncategorized system bin.
+# Interactive use requires typing RESET.
 ./scripts/start-clean-db.sh
 
 # Non-interactive confirmation, only after the user explicitly requests a new
@@ -42,8 +43,9 @@ Whenever the user asks to **run/start ParcelHub**, use
 Whenever the user asks to **start, spin up, reset, or create a clean/new local
 database**, use `./scripts/start-clean-db.sh --yes`. A direct user request for a
 clean/new database authorizes that reset; otherwise never pass `--yes` or reset
-the database. Do not seed after a clean reset unless the user separately asks
-for sample data.
+the database. A clean database retains the permanent Uncategorized bin but no
+user-created records. Do not seed after a clean reset unless the user separately
+asks for sample data.
 
 The run script records its child processes in `.parcelhub-dev.pids`, prevents a
 duplicate launch, and cleans both servers up when it receives an interrupt. The

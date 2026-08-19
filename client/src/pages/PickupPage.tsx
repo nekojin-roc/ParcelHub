@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api, type Package } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ import {
 type ScanMode = "manual" | "camera";
 
 export default function PickupPage() {
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<ScanMode>("manual");
   const [barcodeInput, setBarcodeInput] = useState("");
@@ -54,20 +56,22 @@ export default function PickupPage() {
       const packages = await api.listPackages({ search: barcode.trim() });
       const pkg = packages.find((p) => p.barcode === barcode.trim());
       if (!pkg) {
-        setError(`No package found with barcode "${barcode.trim()}"`);
+        setError(t("pickup.errors.notFound", { barcode: barcode.trim() }));
         return;
       }
       if (pkg.status === "PICKED_UP") {
         setError(
-          `This package was already picked up on ${new Date(pkg.pickedUpAt!).toLocaleDateString()}`
+          t("pickup.errors.alreadyPickedUp", {
+            date: new Intl.DateTimeFormat(i18n.language).format(new Date(pkg.pickedUpAt!)),
+          })
         );
         return;
       }
       setScannedPkg(pkg);
     } catch (err: any) {
-      setError(err.message ?? "Lookup failed");
+      setError(err.message ?? t("pickup.errors.lookupFailed"));
     }
-  }, []);
+  }, [i18n.language, t]);
 
   // Pickup mutation
   const pickupMutation = useMutation({
@@ -112,10 +116,10 @@ export default function PickupPage() {
         () => {} // ignore scan failures
       );
     } catch (err) {
-      setError("Could not access camera. Check permissions.");
+      setError(t("pickup.errors.camera"));
       setMode("manual");
     }
-  }, [lookupBarcode]);
+  }, [lookupBarcode, t]);
 
   // Cleanup camera on unmount or mode change
   useEffect(() => {
@@ -140,22 +144,24 @@ export default function PickupPage() {
   // Success screen
   if (success && scannedPkg) {
     return (
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="mx-auto flex max-w-lg flex-col gap-6">
         <Card>
           <CardHeader className="text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
               <Check className="h-6 w-6 text-emerald-600" />
             </div>
-            <CardTitle>Package Collected</CardTitle>
+            <CardTitle>{t("pickup.success.title")}</CardTitle>
             <CardDescription>
-              {scannedPkg.barcode} for {scannedPkg.recipient?.name} has been
-              marked as picked up.
+              {t("pickup.success.description", {
+                barcode: scannedPkg.barcode,
+                recipientName: scannedPkg.recipient?.name ?? t("common.values.unknown"),
+              })}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button className="w-full" onClick={handleReset}>
-              <ScanBarcode className="mr-2 h-4 w-4" />
-              Scan Next
+              <ScanBarcode data-icon="inline-start" />
+              {t("pickup.success.scanNext")}
             </Button>
           </CardContent>
         </Card>
@@ -166,11 +172,11 @@ export default function PickupPage() {
   // Confirmation screen after scanning
   if (scannedPkg) {
     return (
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="mx-auto flex max-w-lg flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Confirm Pickup</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("pickup.confirm.title")}</h1>
           <p className="text-muted-foreground">
-            Verify details before marking as collected.
+            {t("pickup.confirm.description")}
           </p>
         </div>
 
@@ -178,41 +184,45 @@ export default function PickupPage() {
           <CardContent className="pt-6 space-y-4">
             <div className="rounded-lg border p-4 space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Barcode</span>
+                <span className="text-sm text-muted-foreground">{t("pickup.confirm.barcode")}</span>
                 <Badge variant="outline" className="font-mono">
                   {scannedPkg.barcode}
                 </Badge>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Recipient</span>
+                <span className="text-sm text-muted-foreground">{t("pickup.confirm.recipient")}</span>
                 <span className="font-medium">{scannedPkg.recipient?.name}</span>
               </div>
               {scannedPkg.description && (
                 <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">
-                    Description
+                    {t("pickup.confirm.packageDescription")}
                   </span>
                   <span>{scannedPkg.description}</span>
                 </div>
               )}
               {scannedPkg.bin && (
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Bin</span>
-                  <span>{scannedPkg.bin.label}</span>
+                  <span className="text-sm text-muted-foreground">{t("pickup.confirm.bin")}</span>
+                  <span>
+                    {scannedPkg.bin.isDefault
+                      ? t("common.storageBins.uncategorized.label")
+                      : scannedPkg.bin.label}
+                  </span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Received</span>
+                <span className="text-sm text-muted-foreground">{t("pickup.confirm.received")}</span>
                 <span>
-                  {new Date(scannedPkg.receivedAt).toLocaleDateString()}
+                  {new Intl.DateTimeFormat(i18n.language).format(new Date(scannedPkg.receivedAt))}
                 </span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Collected by (optional)</Label>
+              <Label>{t("pickup.confirm.collectedBy")}</Label>
               <Input
-                placeholder="Name of person picking up"
+                placeholder={t("pickup.confirm.collectedByPlaceholder")}
                 value={collectedBy}
                 onChange={(e) => setCollectedBy(e.target.value)}
               />
@@ -226,7 +236,7 @@ export default function PickupPage() {
 
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={handleReset}>
-                Cancel
+                {t("common.actions.cancel")}
               </Button>
               <Button
                 className="flex-1"
@@ -238,7 +248,7 @@ export default function PickupPage() {
                 ) : (
                   <Check className="mr-2 h-4 w-4" />
                 )}
-                Confirm Pickup
+                {t("pickup.confirm.action")}
               </Button>
             </div>
           </CardContent>
@@ -249,11 +259,11 @@ export default function PickupPage() {
 
   // Scan/input screen
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Package Pickup</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("pickup.title")}</h1>
         <p className="text-muted-foreground">
-          Scan or enter a barcode to mark a package as collected.
+          {t("pickup.description")}
         </p>
       </div>
 
@@ -265,7 +275,7 @@ export default function PickupPage() {
           onClick={() => setMode("manual")}
         >
           <Keyboard className="mr-2 h-4 w-4" />
-          Manual / Scanner
+          {t("pickup.modes.manual")}
         </Button>
         <Button
           variant={mode === "camera" ? "default" : "outline"}
@@ -273,7 +283,7 @@ export default function PickupPage() {
           onClick={() => setMode("camera")}
         >
           <Camera className="mr-2 h-4 w-4" />
-          Camera
+          {t("pickup.modes.camera")}
         </Button>
       </div>
 
@@ -282,23 +292,22 @@ export default function PickupPage() {
           {mode === "manual" ? (
             <>
               <div className="space-y-2">
-                <Label>Barcode</Label>
+                <Label>{t("pickup.scanner.barcodeLabel")}</Label>
                 <div className="flex gap-2">
                   <Input
                     ref={inputRef}
-                    placeholder="Scan or type barcode..."
+                    placeholder={t("pickup.scanner.placeholder")}
                     value={barcodeInput}
                     onChange={(e) => setBarcodeInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleManualSubmit()}
                     autoFocus
                   />
-                  <Button onClick={handleManualSubmit} disabled={!barcodeInput.trim()}>
+                  <Button aria-label={t("pickup.scanner.submitLabel")} onClick={handleManualSubmit} disabled={!barcodeInput.trim()}>
                     <ScanBarcode className="h-4 w-4" />
                   </Button>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Tip: USB barcode scanners will type directly into this field.
-                  Just scan!
+                  {t("pickup.scanner.tip")}
                 </p>
               </div>
             </>
@@ -310,7 +319,7 @@ export default function PickupPage() {
                 className="w-full rounded-lg overflow-hidden bg-muted min-h-[250px]"
               />
               <p className="text-xs text-muted-foreground text-center">
-                Point your camera at the barcode label.
+                {t("pickup.scanner.cameraTip")}
               </p>
             </div>
           )}

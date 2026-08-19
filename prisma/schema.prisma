@@ -24,6 +24,7 @@ model Bin {
   label       String    @unique // e.g. "A-1", "Shelf-B"
   description String? // e.g. "Top shelf, hallway closet"
   capacity    Int       @default(10)
+  isDefault   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   packages    Package[]
 }

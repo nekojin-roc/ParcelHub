@@ -1,5 +1,6 @@
-import { useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,14 +28,6 @@ export interface PackageDetails {
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 
-function photoValidationError(photo: File): string | null {
-  if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(photo.type)) {
-    return "Choose a JPEG, PNG, or WebP image.";
-  }
-  if (photo.size > MAX_PHOTO_BYTES) return "Photo must be 5 MB or smaller.";
-  return null;
-}
-
 interface PackageDetailsFormProps {
   onSubmit: (details: PackageDetails) => void;
   isPending: boolean;
@@ -46,8 +39,9 @@ export default function PackageDetailsForm({
   onSubmit,
   isPending,
   error,
-  submitLabel = "Register Package",
+  submitLabel,
 }: PackageDetailsFormProps) {
+  const { t } = useTranslation();
   const [recipientId, setRecipientId] = useState("");
   const [description, setDescription] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
@@ -67,15 +61,21 @@ export default function PackageDetailsForm({
     !recipientsQuery.isError &&
     recipients.length === 0;
   const recipientUnavailableMessage = recipientsQuery.isError
-    ? "Unable to check recipients. Refresh the page and try again."
+    ? t("intake.errors.checkRecipients")
     : noRecipients
-      ? "Add a recipient on the Recipients page before adding a package."
+      ? t("intake.errors.recipientRequiredForPackage")
       : undefined;
 
   const { data: bins } = useQuery({
     queryKey: ["bins"],
     queryFn: api.listBins,
   });
+
+  useEffect(() => {
+    if (binId || !bins) return;
+    const defaultBin = bins.find((bin) => bin.isDefault);
+    if (defaultBin) setBinId(defaultBin.id);
+  }, [binId, bins]);
 
   const handleSubmit = () => {
     if (!recipientId) return;
@@ -98,7 +98,13 @@ export default function PackageDetailsForm({
       return;
     }
 
-    const validationError = photoValidationError(selectedPhoto);
+    const validationError = !new Set(["image/jpeg", "image/png", "image/webp"]).has(
+      selectedPhoto.type
+    )
+      ? t("intake.errors.photoType")
+      : selectedPhoto.size > MAX_PHOTO_BYTES
+        ? t("intake.errors.photoSize")
+        : null;
     setPhoto(validationError ? null : selectedPhoto);
     setPhotoError(validationError);
   };
@@ -107,7 +113,7 @@ export default function PackageDetailsForm({
     <div className="space-y-4">
       {/* Recipient */}
       <div className="space-y-2">
-        <Label>Recipient *</Label>
+        <Label>{t("intake.form.recipient.label")}</Label>
         <Select
           value={recipientId}
           onValueChange={setRecipientId}
@@ -118,7 +124,7 @@ export default function PackageDetailsForm({
           }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Select recipient..." />
+            <SelectValue placeholder={t("intake.form.recipient.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
@@ -134,9 +140,9 @@ export default function PackageDetailsForm({
 
       {/* Description */}
       <div className="space-y-2">
-        <Label>Description</Label>
+        <Label>{t("intake.form.description.label")}</Label>
         <Input
-          placeholder="e.g. Anime figure, Electronics..."
+          placeholder={t("intake.form.description.placeholder")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -144,9 +150,9 @@ export default function PackageDetailsForm({
 
       {/* Order Number */}
       <div className="space-y-2">
-        <Label>Order Number</Label>
+        <Label>{t("intake.form.orderNumber.label")}</Label>
         <Input
-          placeholder="e.g. ORD-12345"
+          placeholder={t("intake.form.orderNumber.placeholder")}
           value={orderNumber}
           onChange={(e) => setOrderNumber(e.target.value)}
         />
@@ -154,9 +160,9 @@ export default function PackageDetailsForm({
 
       {/* Tracking Number */}
       <div className="space-y-2">
-        <Label>Carrier Tracking Number</Label>
+        <Label>{t("intake.form.trackingNumber.label")}</Label>
         <Input
-          placeholder="e.g. 1Z999AA10123456784"
+          placeholder={t("intake.form.trackingNumber.placeholder")}
           value={trackingNumber}
           onChange={(e) => setTrackingNumber(e.target.value)}
         />
@@ -164,7 +170,7 @@ export default function PackageDetailsForm({
 
       {/* Photo */}
       <div className="space-y-2">
-        <Label htmlFor="package-photo">Package Photo</Label>
+        <Label htmlFor="package-photo">{t("intake.form.photo.label")}</Label>
         <Input
           id="package-photo"
           type="file"
@@ -172,11 +178,11 @@ export default function PackageDetailsForm({
           onChange={handlePhotoChange}
         />
         <p className="text-xs text-muted-foreground">
-          Optional. JPEG, PNG, or WebP up to 5 MB.
+          {t("intake.form.photo.helper")}
         </p>
         {photo && (
           <p className="text-xs text-muted-foreground">
-            Selected: {photo.name}
+            {t("intake.form.photo.selected", { fileName: photo.name })}
           </p>
         )}
         {photoError && <p className="text-sm text-destructive">{photoError}</p>}
@@ -184,22 +190,31 @@ export default function PackageDetailsForm({
 
       {/* Bin */}
       <div className="space-y-2">
-        <Label>Storage Bin</Label>
+        <Label>{t("intake.form.bin.label")}</Label>
         <Select value={binId} onValueChange={setBinId}>
           <SelectTrigger>
-            <SelectValue placeholder="Select bin..." />
+            <SelectValue placeholder={t("intake.form.bin.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {bins?.map((b) => (
-                <SelectItem key={b.id} value={b.id}>
-                  {b.label}
-                  {b.description ? ` — ${b.description}` : ""}
-                  {b.currentCount !== undefined
-                    ? ` (${b.currentCount}/${b.capacity})`
-                    : ""}
-                </SelectItem>
-              ))}
+              {bins?.map((b) => {
+                const label = b.isDefault
+                  ? t("common.storageBins.uncategorized.label")
+                  : b.label;
+                const binDescription = b.isDefault
+                  ? t("common.storageBins.uncategorized.description")
+                  : b.description;
+
+                return (
+                  <SelectItem key={b.id} value={b.id}>
+                    {label}
+                    {binDescription ? ` — ${binDescription}` : ""}
+                    {b.currentCount !== undefined
+                      ? ` (${b.currentCount}/${b.capacity})`
+                      : ""}
+                  </SelectItem>
+                );
+              })}
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -215,7 +230,7 @@ export default function PackageDetailsForm({
           className="h-4 w-4 rounded border-input"
         />
         <Label htmlFor="notify" className="cursor-pointer">
-          Send email notification to recipient
+          {t("intake.form.notify")}
         </Label>
       </div>
 
@@ -241,7 +256,7 @@ export default function PackageDetailsForm({
           ) : (
             <PackagePlus data-icon="inline-start" />
           )}
-          {submitLabel}
+          {submitLabel ?? t("intake.form.submit")}
         </Button>
       </RecipientRequiredTooltip>
     </div>

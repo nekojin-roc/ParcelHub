@@ -64,6 +64,7 @@ export interface Bin {
   label: string;
   description?: string | null;
   capacity: number;
+  isDefault: boolean;
   currentCount?: number;
 }
 
@@ -82,7 +83,7 @@ export interface Package {
   recipientId: string;
   recipient?: Pick<Recipient, "id" | "name" | "email">;
   binId?: string | null;
-  bin?: Pick<Bin, "id" | "label"> | null;
+  bin?: Pick<Bin, "id" | "label" | "isDefault"> | null;
 }
 
 export interface DashboardStats {

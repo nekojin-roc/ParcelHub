@@ -1,8 +1,11 @@
 import { PrismaClient } from "@prisma/client";
+import { ensureDefaultBin } from "../src/utils/default-bin.js";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  const defaultBin = await ensureDefaultBin(prisma);
+
   // Create sample bins
   const bins = await Promise.all([
     prisma.bin.create({
@@ -40,7 +43,9 @@ async function main() {
     }),
   ]);
 
-  console.log(`Seeded ${bins.length} bins and ${recipients.length} recipients.`);
+  console.log(
+    `Seeded ${bins.length + 1} bins (including ${defaultBin.label}) and ${recipients.length} recipients.`
+  );
 }
 
 main()

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { KeyRound, Loader2 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function ResetPasswordPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const linkError = searchParams.get("error");
@@ -29,11 +31,11 @@ export default function ResetPasswordPage() {
     setError(null);
 
     if (!token) {
-      setError("This password reset link is invalid or has expired.");
+      setError(t("auth.reset.invalidShort"));
       return;
     }
     if (password !== confirmation) {
-      setError("The passwords do not match.");
+      setError(t("auth.reset.mismatch"));
       return;
     }
 
@@ -45,13 +47,13 @@ export default function ResetPasswordPage() {
       });
 
       if (result.error) {
-        setError(result.error.message ?? "Unable to reset your password");
+        setError(result.error.message ?? t("auth.reset.error"));
       } else {
         setIsComplete(true);
       }
     } catch (error) {
       setError(
-        error instanceof Error ? error.message : "Unable to reset your password"
+        error instanceof Error ? error.message : t("auth.reset.error")
       );
     } finally {
       setIsSubmitting(false);
@@ -67,28 +69,26 @@ export default function ResetPasswordPage() {
           <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
             <KeyRound className="size-5" />
           </div>
-          <CardTitle>Choose a new password</CardTitle>
+          <CardTitle>{t("auth.reset.title")}</CardTitle>
           <CardDescription>
             {isComplete
-              ? "Your password has been updated."
-              : "Use at least 8 characters for your new password."}
+              ? t("auth.reset.updated")
+              : t("auth.reset.instructions")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isComplete ? (
             <p className="text-sm text-muted-foreground">
-              Existing sessions have been signed out. Sign in again with your
-              new password.
+              {t("auth.reset.complete")}
             </p>
           ) : invalidLink ? (
             <p className="text-sm text-destructive">
-              This password reset link is invalid or has expired. Request a new
-              link to continue.
+              {t("auth.reset.invalid")}
             </p>
           ) : (
             <form className="flex flex-col gap-4" onSubmit={submit}>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="new-password">New password</Label>
+                <Label htmlFor="new-password">{t("auth.reset.newPassword")}</Label>
                 <Input
                   id="new-password"
                   type="password"
@@ -100,7 +100,9 @@ export default function ResetPasswordPage() {
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="confirm-password">Confirm new password</Label>
+                <Label htmlFor="confirm-password">
+                  {t("auth.reset.confirmPassword")}
+                </Label>
                 <Input
                   id="confirm-password"
                   type="password"
@@ -116,7 +118,7 @@ export default function ResetPasswordPage() {
                 {isSubmitting && (
                   <Loader2 data-icon="inline-start" className="animate-spin" />
                 )}
-                Reset password
+                {t("auth.reset.action")}
               </Button>
             </form>
           )}
@@ -126,7 +128,7 @@ export default function ResetPasswordPage() {
             to={invalidLink ? "/forgot-password" : "/auth"}
             className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
-            {invalidLink ? "Request a new reset link" : "Back to sign in"}
+            {invalidLink ? t("auth.reset.requestNew") : t("auth.forgot.back")}
           </Link>
         </CardFooter>
       </Card>

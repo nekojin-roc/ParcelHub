@@ -17,6 +17,7 @@ import {
   removePackagePhoto,
   storePackagePhoto,
 } from "../services/package-photo.js";
+import { ensureDefaultBin } from "../utils/default-bin.js";
 
 const BARCODE_PATTERN = /^PKG-\d{8}-[A-Z0-9]{4}$/;
 
@@ -62,7 +63,7 @@ export async function packageRoutes(app: FastifyInstance) {
       orderBy: { receivedAt: "desc" },
       include: {
         recipient: { select: { id: true, name: true, email: true } },
-        bin: { select: { id: true, label: true } },
+        bin: { select: { id: true, label: true, isDefault: true } },
       },
     });
     return packages;
@@ -192,6 +193,7 @@ export async function packageRoutes(app: FastifyInstance) {
 
     const data = parsed.data;
     const barcode = data.barcode ?? generateBarcodeId();
+    const binId = data.binId ?? (await ensureDefaultBin(app.prisma)).id;
 
     let pkg;
     try {
@@ -202,7 +204,7 @@ export async function packageRoutes(app: FastifyInstance) {
           orderNumber: data.orderNumber,
           trackingNumber: data.trackingNumber,
           recipientId: data.recipientId,
-          binId: data.binId || null,
+          binId,
           status: "RECEIVED",
         },
         include: { recipient: true, bin: true },

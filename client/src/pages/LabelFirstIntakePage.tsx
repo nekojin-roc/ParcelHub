@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -16,6 +17,7 @@ type LabelIntakeDetails = PackageDetails & { barcode: string };
 // parcel, then fill in the details. The package record is only created when
 // the details form is submitted.
 export default function LabelFirstIntakePage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const recipientsQuery = useQuery({
     queryKey: ["recipients"],
@@ -25,9 +27,9 @@ export default function LabelFirstIntakePage() {
   const labelUnavailable =
     recipientsQuery.isLoading || recipientsQuery.isError || !hasRecipients;
   const unavailableMessage = recipientsQuery.isError
-    ? "Unable to check recipients. Refresh the page and try again."
+    ? t("intake.errors.checkRecipients")
     : !recipientsQuery.isLoading && !hasRecipients
-      ? "Add a recipient on the Recipients page before printing a package label."
+      ? t("intake.errors.recipientRequiredForLabel")
       : undefined;
 
   const [label, setLabel] = useState<{
@@ -73,7 +75,7 @@ export default function LabelFirstIntakePage() {
           photoError =
             error instanceof Error
               ? error.message
-              : "The package was saved, but its photo could not be uploaded.";
+              : t("intake.errors.photoUpload");
         }
       }
 
@@ -83,7 +85,7 @@ export default function LabelFirstIntakePage() {
       setResult({
         id: pkg.id,
         barcode: pkg.barcode,
-        recipientName: pkg.recipient?.name ?? "Unknown",
+        recipientName: pkg.recipient?.name ?? t("common.values.unknown"),
         notified: pkg.status === "NOTIFIED",
         photoPath: pkg.photoPath,
         photoVersion: Date.now(),
@@ -104,16 +106,20 @@ export default function LabelFirstIntakePage() {
   // Step 3: done
   if (result) {
     return (
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="mx-auto flex max-w-lg flex-col gap-6">
         <Card>
           <CardHeader className="text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
               <Check className="h-6 w-6 text-emerald-600" />
             </div>
-            <CardTitle>Package Registered</CardTitle>
+            <CardTitle>{t("intake.success.title")}</CardTitle>
             <CardDescription>
-              Package for {result.recipientName} has been logged
-              {result.notified ? " and notified" : ""}.
+              {t(
+                result.notified
+                  ? "intake.success.loggedAndNotified"
+                  : "intake.success.logged",
+                { recipientName: result.recipientName }
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -130,7 +136,7 @@ export default function LabelFirstIntakePage() {
             {result.photoPath && (
               <img
                 src={api.packagePhotoUrl(result.id, result.photoVersion)}
-                alt={`Package ${result.barcode}`}
+                alt={t("intake.success.photoAlt", { barcode: result.barcode })}
                 className="mx-auto max-h-64 max-w-full rounded-md object-contain"
               />
             )}
@@ -138,8 +144,8 @@ export default function LabelFirstIntakePage() {
               <p className="text-sm text-destructive">{result.photoError}</p>
             )}
             <Button className="w-full" onClick={handleReset}>
-              <PackagePlus className="mr-2 h-4 w-4" />
-              Next Package
+              <PackagePlus data-icon="inline-start" />
+              {t("intake.actions.nextPackage")}
             </Button>
           </CardContent>
         </Card>
@@ -150,13 +156,13 @@ export default function LabelFirstIntakePage() {
   // Step 2: label printed/downloaded — fill in package details
   if (label) {
     return (
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="mx-auto flex max-w-lg flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Package Details</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("intake.labelFirst.packageDetailsTitle")}</h1>
           <p className="text-muted-foreground">
             {label.printed
-              ? "Label sent to printer. Stick it on the parcel, then fill in the details."
-              : "Label downloaded as PDF. Print and stick it on the parcel, then fill in the details."}
+              ? t("intake.labelFirst.printedDescription")
+              : t("intake.labelFirst.downloadedDescription")}
           </p>
         </div>
 
@@ -178,7 +184,7 @@ export default function LabelFirstIntakePage() {
                   className="text-sm text-muted-foreground underline inline-flex items-center gap-1"
                 >
                   <FileDown className="h-3.5 w-3.5" />
-                  PDF
+                  {t("intake.labelFirst.pdf")}
                 </a>
               </div>
             </div>
@@ -191,7 +197,7 @@ export default function LabelFirstIntakePage() {
               error={
                 intakeMutation.isError ? intakeMutation.error.message : null
               }
-              submitLabel="Complete Intake"
+              submitLabel={t("intake.actions.complete")}
             />
           </CardContent>
         </Card>
@@ -201,12 +207,11 @@ export default function LabelFirstIntakePage() {
 
   // Step 1: print the label
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Label-First Intake</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("intake.labelFirst.title")}</h1>
         <p className="text-muted-foreground">
-          Print a barcode label first, stick it on the parcel, then fill in the
-          details.
+          {t("intake.labelFirst.description")}
         </p>
       </div>
 
@@ -221,7 +226,7 @@ export default function LabelFirstIntakePage() {
           ) : (
             <Printer data-icon="inline-start" />
           )}
-          Print Label
+          {t("intake.actions.printLabel")}
         </Button>
       </RecipientRequiredTooltip>
 

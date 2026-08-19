@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Link2, LoaderCircle, TicketPlus, UserRound } from "lucide-react";
 import {
   api,
@@ -28,8 +29,8 @@ import {
 
 const UNASSIGNED = "__unassigned__";
 
-function formatDate(value: string): string {
-  return new Date(value).toLocaleDateString();
+function formatDate(value: string, locale: string): string {
+  return new Intl.DateTimeFormat(locale).format(new Date(value));
 }
 
 function ReferralCodesCard({
@@ -43,15 +44,15 @@ function ReferralCodesCard({
   isGenerating: boolean;
   onGenerate: () => void;
 }) {
+  const { t, i18n } = useTranslation();
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <CardTitle>Referral codes</CardTitle>
+            <CardTitle>{t("users.referrals.title")}</CardTitle>
             <CardDescription>
-              Generate a single-use code for a new account. Used codes leave
-              this list automatically.
+              {t("users.referrals.description")}
             </CardDescription>
           </div>
           <Button onClick={onGenerate} disabled={isGenerating}>
@@ -60,18 +61,18 @@ function ReferralCodesCard({
             ) : (
               <TicketPlus data-icon="inline-start" />
             )}
-            Generate code
+            {t("users.referrals.generate")}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <p className="text-sm text-muted-foreground">
-            Loading active referral codes...
+            {t("users.referrals.loading")}
           </p>
         ) : codes.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No active referral codes.
+            {t("users.referrals.empty")}
           </p>
         ) : (
           <div className="flex flex-col divide-y rounded-lg border">
@@ -84,10 +85,13 @@ function ReferralCodesCard({
                   <code className="font-mono text-sm font-semibold">
                     {code.code}
                   </code>
-                  <Badge variant="outline">Active</Badge>
+                  <Badge variant="outline">{t("users.referrals.active")}</Badge>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  Generated {formatDate(code.createdAt)} by {code.createdBy.name}
+                  {t("users.referrals.generatedBy", {
+                    date: formatDate(code.createdAt, i18n.language),
+                    name: code.createdBy.name,
+                  })}
                 </span>
               </div>
             ))}
@@ -111,6 +115,7 @@ function RegisteredUserCard({
   isSaving: boolean;
   onSave: (recipientId: string | null) => void;
 }) {
+  const { t, i18n } = useTranslation();
   const savedRecipientId = user.recipient?.id ?? null;
   const [recipientId, setRecipientId] = useState(savedRecipientId);
 
@@ -132,23 +137,23 @@ function RegisteredUserCard({
             </div>
           </div>
           <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
-            {user.role === "ADMIN" ? "Admin" : "User"}
+            {user.role === "ADMIN" ? t("common.roles.admin") : t("common.roles.user")}
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-3 text-sm">
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="outline">
-            {user.emailVerified ? "Email verified" : "Email not verified"}
+            {user.emailVerified ? t("users.card.emailVerified") : t("users.card.emailNotVerified")}
           </Badge>
           <span className="text-muted-foreground">
-            Registered {formatDate(user.createdAt)}
+            {t("users.card.registered", { date: formatDate(user.createdAt, i18n.language) })}
           </span>
         </div>
         <div className="flex flex-col gap-1">
-          <span className="text-muted-foreground">Linked recipient</span>
+          <span className="text-muted-foreground">{t("users.card.linkedRecipient")}</span>
           <span className="font-medium">
-            {user.recipient?.name ?? "Not linked"}
+            {user.recipient?.name ?? t("users.card.notLinked")}
           </span>
         </div>
       </CardContent>
@@ -160,12 +165,12 @@ function RegisteredUserCard({
           }
           disabled={isSaving}
         >
-          <SelectTrigger aria-label={`Recipient linked to ${user.name}`}>
-            <SelectValue placeholder="Select a recipient" />
+          <SelectTrigger aria-label={t("users.card.selectorLabel", { name: user.name })}>
+            <SelectValue placeholder={t("users.card.selectorPlaceholder")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value={UNASSIGNED}>Not linked</SelectItem>
+              <SelectItem value={UNASSIGNED}>{t("users.card.notLinked")}</SelectItem>
               {recipients.map((recipient) => (
                 <SelectItem
                   key={recipient.id}
@@ -190,7 +195,7 @@ function RegisteredUserCard({
           ) : (
             <Link2 data-icon="inline-start" />
           )}
-          Save link
+          {t("users.card.saveLink")}
         </Button>
       </CardFooter>
     </Card>
@@ -198,6 +203,7 @@ function RegisteredUserCard({
 }
 
 export default function RegisteredUsersPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const usersQuery = useQuery({
     queryKey: ["registered-users"],
@@ -253,9 +259,9 @@ export default function RegisteredUsersPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Registered Users</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("users.title")}</h1>
         <p className="text-muted-foreground">
-          View account access and connect each account to a recipient profile.
+          {t("users.description")}
         </p>
       </div>
 
@@ -269,7 +275,7 @@ export default function RegisteredUsersPage() {
       {error && (
         <Card>
           <CardHeader>
-            <CardTitle>Unable to load or update registered users</CardTitle>
+            <CardTitle>{t("users.errorTitle")}</CardTitle>
             <CardDescription>{error.message}</CardDescription>
           </CardHeader>
         </Card>
@@ -278,18 +284,18 @@ export default function RegisteredUsersPage() {
       {usersQuery.isLoading || recipientsQuery.isLoading ? (
         <Card>
           <CardHeader>
-            <CardTitle>Loading registered users</CardTitle>
+            <CardTitle>{t("users.loadingTitle")}</CardTitle>
             <CardDescription>
-              Retrieving accounts and recipient profiles...
+              {t("users.loadingDescription")}
             </CardDescription>
           </CardHeader>
         </Card>
       ) : users.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No registered users</CardTitle>
+            <CardTitle>{t("users.emptyTitle")}</CardTitle>
             <CardDescription>
-              Accounts will appear here after they complete registration.
+              {t("users.emptyDescription")}
             </CardDescription>
           </CardHeader>
         </Card>

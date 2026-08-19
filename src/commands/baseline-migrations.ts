@@ -1,9 +1,11 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
 import { parseArguments, prisma, runCommand } from "./cli.js";
+import { ensureDefaultBin } from "../utils/default-bin.js";
 
 const BASELINE = "20260819000000_baseline";
 const ACCOUNT_CONTROLS = "20260819001000_account_controls";
+const DEFAULT_BIN = "20260819002000_default_bin";
 const USAGE = "Usage: npm run db:migrate:baseline";
 
 function applyResolution(migration: string): void {
@@ -63,6 +65,9 @@ async function main(): Promise<void> {
   const referralColumns = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
     "PRAGMA table_info('ReferralCode')"
   );
+  const binColumns = await prisma.$queryRawUnsafe<Array<{ name: string }>>(
+    "PRAGMA table_info('Bin')"
+  );
   const hasDisabledAt = userColumns.some((column) => column.name === "disabledAt");
   const hasDisabledReason = userColumns.some(
     (column) => column.name === "disabledReason"
@@ -78,13 +83,26 @@ async function main(): Promise<void> {
     );
   }
 
+  const defaultBinPresent = binColumns.some(
+    (column) => column.name === "isDefault"
+  );
+  if (defaultBinPresent) {
+    const defaultBin = await ensureDefaultBin(prisma);
+    await prisma.package.updateMany({
+      where: { binId: null },
+      data: { binId: defaultBin.id },
+    });
+    await prisma.$executeRawUnsafe(
+      'CREATE UNIQUE INDEX IF NOT EXISTS "Bin_single_default_idx" ON "Bin"("isDefault") WHERE "isDefault" = true'
+    );
+  }
+
   await prisma.$disconnect();
   applyResolution(BASELINE);
   if (accountControlsPresent) applyResolution(ACCOUNT_CONTROLS);
+  if (defaultBinPresent) applyResolution(DEFAULT_BIN);
   console.log(
-    accountControlsPresent
-      ? "Marked the baseline and existing account-controls schema as applied."
-      : "Marked the baseline as applied. Run npm run db:migrate:deploy next."
+    `Marked the baseline${accountControlsPresent ? ", account controls" : ""}${defaultBinPresent ? ", and default-bin schema" : ""} as applied. Run npm run db:migrate:deploy next.`
   );
 }
 

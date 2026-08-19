@@ -1,0 +1,4 @@
+interface:
+  display_name: "ParcelHub i18n Sync"
+  short_description: "Keep ParcelHub UI translations synchronized"
+  default_prompt: "Use $parcelhub-i18n-sync to update translations for my UI changes."

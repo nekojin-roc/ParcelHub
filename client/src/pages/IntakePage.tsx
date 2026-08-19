@@ -1,31 +1,36 @@
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import RecipientRequiredTooltip from "@/components/RecipientRequiredTooltip";
 import { PackagePlus, PencilLine } from "lucide-react";
 
 export default function IntakePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const recipientsQuery = useQuery({
     queryKey: ["recipients"],
     queryFn: api.listRecipients,
   });
   const hasRecipients = (recipientsQuery.data?.length ?? 0) > 0;
-  const intakeUnavailable =
-    recipientsQuery.isLoading || recipientsQuery.isError || !hasRecipients;
+  const intakeUnavailable = recipientsQuery.isLoading || recipientsQuery.isError;
   const unavailableMessage = recipientsQuery.isError
-    ? "Unable to check recipients. Refresh the page and try again."
+    ? t("intake.errors.checkRecipients")
     : !recipientsQuery.isLoading && !hasRecipients
-      ? "Add a recipient on the Recipients page before starting intake."
+      ? t("intake.errors.recipientRequiredForIntake")
       : undefined;
 
+  const openIntake = (path: string) => {
+    navigate(hasRecipients ? path : "/recipients");
+  };
+
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Package Intake</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("intake.title")}</h1>
         <p className="text-muted-foreground">
-          Choose how to register incoming packages.
+          {t("intake.description")}
         </p>
       </div>
 
@@ -34,10 +39,10 @@ export default function IntakePage() {
           <Button
             className="h-24 w-full text-lg font-semibold [&_svg]:size-6"
             disabled={intakeUnavailable}
-            onClick={() => navigate("/intake/label")}
+            onClick={() => openIntake("/intake/label")}
           >
             <PackagePlus data-icon="inline-start" />
-            Intake
+            {t("intake.actions.start")}
           </Button>
         </RecipientRequiredTooltip>
         <RecipientRequiredTooltip message={unavailableMessage}>
@@ -45,10 +50,10 @@ export default function IntakePage() {
             variant="outline"
             className="h-12 w-full"
             disabled={intakeUnavailable}
-            onClick={() => navigate("/intake/manual")}
+            onClick={() => openIntake("/intake/manual")}
           >
             <PencilLine data-icon="inline-start" />
-            Manual Intake
+            {t("intake.actions.manual")}
           </Button>
         </RecipientRequiredTooltip>
       </div>

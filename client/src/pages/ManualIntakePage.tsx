@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import PackageDetailsForm, {
 import { PackagePlus, Printer, Check } from "lucide-react";
 
 export default function ManualIntakePage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   // Result state after successful intake
@@ -35,7 +37,7 @@ export default function ManualIntakePage() {
           photoError =
             error instanceof Error
               ? error.message
-              : "The package was saved, but its photo could not be uploaded.";
+              : t("intake.errors.photoUpload");
         }
       }
 
@@ -45,7 +47,7 @@ export default function ManualIntakePage() {
       setResult({
         id: pkg.id,
         barcode: pkg.barcode,
-        recipientName: pkg.recipient?.name ?? "Unknown",
+        recipientName: pkg.recipient?.name ?? t("common.values.unknown"),
         notified: pkg.status === "NOTIFIED",
         photoPath: pkg.photoPath,
         photoVersion: Date.now(),
@@ -66,7 +68,7 @@ export default function ManualIntakePage() {
     if (!printWindow) return;
     printWindow.document.write(`
       <html>
-        <head><title>Label: ${barcode}</title></head>
+        <head><title>${t("intake.printWindowTitle", { barcode })}</title></head>
         <body style="margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;font-family:monospace;">
           <img src="/api/packages/barcode/${barcode}.png" style="max-width:90%;" />
           <p style="margin-top:8px;font-size:14px;">${barcode}</p>
@@ -84,16 +86,20 @@ export default function ManualIntakePage() {
   // Success screen
   if (result) {
     return (
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="mx-auto flex max-w-lg flex-col gap-6">
         <Card>
           <CardHeader className="text-center">
             <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
               <Check className="h-6 w-6 text-emerald-600" />
             </div>
-            <CardTitle>Package Registered</CardTitle>
+            <CardTitle>{t("intake.success.title")}</CardTitle>
             <CardDescription>
-              Package for {result.recipientName} has been logged
-              {result.notified ? " and notified" : ""}.
+              {t(
+                result.notified
+                  ? "intake.success.loggedAndNotified"
+                  : "intake.success.logged",
+                { recipientName: result.recipientName }
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -110,7 +116,7 @@ export default function ManualIntakePage() {
             {result.photoPath && (
               <img
                 src={api.packagePhotoUrl(result.id, result.photoVersion)}
-                alt={`Package ${result.barcode}`}
+                alt={t("intake.success.photoAlt", { barcode: result.barcode })}
                 className="mx-auto max-h-64 max-w-full rounded-md object-contain"
               />
             )}
@@ -123,12 +129,12 @@ export default function ManualIntakePage() {
                 className="flex-1"
                 onClick={() => handlePrint(result.barcode)}
               >
-                <Printer className="mr-2 h-4 w-4" />
-                Print Label
+                <Printer data-icon="inline-start" />
+                {t("intake.actions.printLabel")}
               </Button>
               <Button className="flex-1" onClick={handleReset}>
-                <PackagePlus className="mr-2 h-4 w-4" />
-                Next Package
+                <PackagePlus data-icon="inline-start" />
+                {t("intake.actions.nextPackage")}
               </Button>
             </div>
           </CardContent>
@@ -139,11 +145,11 @@ export default function ManualIntakePage() {
 
   // Intake form
   return (
-    <div className="max-w-lg mx-auto space-y-6">
+    <div className="mx-auto flex max-w-lg flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Manual Intake</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("intake.manual.title")}</h1>
         <p className="text-muted-foreground">
-          Register a new incoming package.
+          {t("intake.manual.description")}
         </p>
       </div>
 

@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { authClient, getUserRole } from "@/lib/auth-client";
 
 const adminNavItems = [
@@ -45,10 +46,11 @@ export default function AppLayout() {
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
       <aside className="hidden md:flex w-60 flex-col border-r bg-sidebar-background">
-        <div className="flex h-14 items-center border-b px-4">
+        <div className="flex h-14 items-center justify-between gap-3 border-b px-4">
           <span className="text-lg font-bold tracking-tight">
             ParcelHub
           </span>
+          <LanguageSwitcher />
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-3">
           {navItems.map(({ to, icon: Icon, labelKey }) => (
@@ -95,6 +97,7 @@ export default function AppLayout() {
           <span className="text-lg font-bold tracking-tight shrink-0">
             ParcelHub
           </span>
+          <LanguageSwitcher />
           {navItems.map(({ to, icon: Icon, labelKey }) => (
             <NavLink
               key={to}

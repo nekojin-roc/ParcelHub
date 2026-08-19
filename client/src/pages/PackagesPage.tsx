@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -13,13 +15,14 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react";
 
-const STATUS_LABELS: Record<string, { label: string; variant: "default" | "warning" | "success" }> = {
-  RECEIVED: { label: "Received", variant: "warning" },
-  NOTIFIED: { label: "Notified", variant: "default" },
-  PICKED_UP: { label: "Picked Up", variant: "success" },
-};
+const STATUS_LABELS = {
+  RECEIVED: { labelKey: "common.packageStatus.received", variant: "warning" },
+  NOTIFIED: { labelKey: "common.packageStatus.notified", variant: "default" },
+  PICKED_UP: { labelKey: "common.packageStatus.pickedUp", variant: "success" },
+} as const;
 
 export default function PackagesPage() {
+  const { t, i18n } = useTranslation();
   const [statusFilter, setStatusFilter] = useState<string>("active");
   const [search, setSearch] = useState("");
 
@@ -43,11 +46,11 @@ export default function PackagesPage() {
       : packages;
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Packages</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("packages.title")}</h1>
         <p className="text-muted-foreground">
-          View and search all registered packages.
+          {t("packages.description")}
         </p>
       </div>
 
@@ -56,7 +59,7 @@ export default function PackagesPage() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search barcode, description, order #..."
+            placeholder={t("packages.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-9"
@@ -67,31 +70,30 @@ export default function PackagesPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="active">Active (Waiting)</SelectItem>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="RECEIVED">Received</SelectItem>
-            <SelectItem value="NOTIFIED">Notified</SelectItem>
-            <SelectItem value="PICKED_UP">Picked Up</SelectItem>
+            <SelectGroup>
+              <SelectItem value="active">{t("packages.filters.active")}</SelectItem>
+              <SelectItem value="all">{t("packages.filters.all")}</SelectItem>
+              <SelectItem value="RECEIVED">{t("common.packageStatus.received")}</SelectItem>
+              <SelectItem value="NOTIFIED">{t("common.packageStatus.notified")}</SelectItem>
+              <SelectItem value="PICKED_UP">{t("common.packageStatus.pickedUp")}</SelectItem>
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>
 
       {/* Package list */}
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div className="text-center py-12 text-muted-foreground">{t("common.status.loading")}</div>
       ) : !filtered?.length ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No packages found.
+            {t("packages.empty")}
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           {filtered.map((pkg) => {
-            const statusInfo = STATUS_LABELS[pkg.status] ?? {
-              label: pkg.status,
-              variant: "default" as const,
-            };
+            const statusInfo = STATUS_LABELS[pkg.status as keyof typeof STATUS_LABELS];
             return (
               <Card key={pkg.id}>
                 <CardContent className="py-4 flex flex-col sm:flex-row sm:items-center gap-3">
@@ -108,30 +110,36 @@ export default function PackagesPage() {
                       <span className="font-mono text-sm font-medium">
                         {pkg.barcode}
                       </span>
-                      <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
+                      <Badge variant={statusInfo?.variant ?? "default"}>
+                        {statusInfo ? t(statusInfo.labelKey) : pkg.status}
+                      </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground truncate mt-0.5">
                       {[
                         pkg.description,
-                        pkg.orderNumber && `Order: ${pkg.orderNumber}`,
+                        pkg.orderNumber && t("packages.orderNumber", { orderNumber: pkg.orderNumber }),
                       ]
                         .filter(Boolean)
-                        .join(" · ") || "No description"}
+                        .join(" · ") || t("packages.noDescription")}
                     </p>
                   </div>
 
                   {/* Recipient + bin */}
                   <div className="flex items-center gap-4 text-sm shrink-0">
                     <span className="font-medium">
-                      {pkg.recipient?.name ?? "Unknown"}
+                      {pkg.recipient?.name ?? t("common.values.unknown")}
                     </span>
                     {pkg.bin && (
                       <Badge variant="outline" className="text-xs">
-                        Bin {pkg.bin.label}
+                        {t("packages.bin", {
+                          label: pkg.bin.isDefault
+                            ? t("common.storageBins.uncategorized.label")
+                            : pkg.bin.label,
+                        })}
                       </Badge>
                     )}
                     <span className="text-muted-foreground">
-                      {new Date(pkg.receivedAt).toLocaleDateString()}
+                      {new Intl.DateTimeFormat(i18n.language).format(new Date(pkg.receivedAt))}
                     </span>
                   </div>
                 </CardContent>

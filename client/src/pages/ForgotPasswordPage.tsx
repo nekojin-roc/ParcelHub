@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Loader2, Mail } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -15,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function ForgotPasswordPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +34,7 @@ export default function ForgotPasswordPage() {
       });
 
       if (result.error) {
-        setError(result.error.message ?? "Unable to request a password reset");
+        setError(result.error.message ?? t("auth.forgot.error"));
       } else {
         setIsSent(true);
       }
@@ -40,7 +42,7 @@ export default function ForgotPasswordPage() {
       setError(
         error instanceof Error
           ? error.message
-          : "Unable to request a password reset"
+          : t("auth.forgot.error")
       );
     } finally {
       setIsSubmitting(false);
@@ -54,20 +56,20 @@ export default function ForgotPasswordPage() {
           <div className="flex size-11 items-center justify-center rounded-full bg-secondary text-secondary-foreground">
             <Mail className="size-5" />
           </div>
-          <CardTitle>Reset your password</CardTitle>
+          <CardTitle>{t("auth.forgot.title")}</CardTitle>
           <CardDescription>
-            Enter your account email and we will send a single-use reset link.
+            {t("auth.forgot.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           {isSent ? (
             <p className="text-sm text-muted-foreground">
-              If an account exists for that address, a reset link has been sent.
+              {t("auth.forgot.sent")}
             </p>
           ) : (
             <form className="flex flex-col gap-4" onSubmit={submit}>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="reset-email">Email</Label>
+                <Label htmlFor="reset-email">{t("auth.email")}</Label>
                 <Input
                   id="reset-email"
                   type="email"
@@ -82,7 +84,7 @@ export default function ForgotPasswordPage() {
                 {isSubmitting && (
                   <Loader2 data-icon="inline-start" className="animate-spin" />
                 )}
-                Send reset link
+                {t("auth.forgot.send")}
               </Button>
             </form>
           )}
@@ -92,7 +94,7 @@ export default function ForgotPasswordPage() {
             to="/auth"
             className="text-sm font-medium text-primary underline-offset-4 hover:underline"
           >
-            Back to sign in
+            {t("auth.forgot.back")}
           </Link>
         </CardFooter>
       </Card>

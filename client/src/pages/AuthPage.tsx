@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Loader2, LockKeyhole } from "lucide-react";
 type AuthMode = "sign-in" | "sign-up";
 
 export default function AuthPage() {
+  const { t } = useTranslation();
   const { data: session, isPending: isCheckingSession } = authClient.useSession();
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<AuthMode>("sign-in");
@@ -39,9 +41,9 @@ export default function AuthPage() {
             })
           : await authClient.signIn.email({ email, password });
 
-      if (result.error) setError(result.error.message ?? "Unable to continue");
+      if (result.error) setError(result.error.message ?? t("auth.unableToContinue"));
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Unable to continue");
+      setError(error instanceof Error ? error.message : t("auth.unableToContinue"));
     } finally {
       setIsSubmitting(false);
     }
@@ -62,8 +64,8 @@ export default function AuthPage() {
           <CardTitle>ParcelHub</CardTitle>
           <CardDescription>
             {isSignUp
-              ? "Administrators are promoted by the host; users see only their linked packages."
-              : "Sign in to manage packages and pickups."}
+              ? t("auth.signUpDescription")
+              : t("auth.signInDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -76,7 +78,7 @@ export default function AuthPage() {
                 setError(null);
               }}
             >
-              Sign in
+              {t("auth.signIn")}
             </Button>
             <Button
               type="button"
@@ -86,24 +88,24 @@ export default function AuthPage() {
                 setError(null);
               }}
             >
-              Create account
+              {t("auth.createAccount")}
             </Button>
           </div>
 
           <form className="flex flex-col gap-4" onSubmit={submit}>
             {wasVerified && (
               <p className="text-sm text-foreground">
-                Your email has been verified. You can sign in normally.
+                {t("auth.verificationSuccess")}
               </p>
             )}
             {verificationError && (
               <p className="text-sm text-destructive">
-                This verification link is invalid or has expired.
+                {t("auth.verificationError")}
               </p>
             )}
             {isSignUp && (
               <div className="flex flex-col gap-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name">{t("auth.name")}</Label>
                 <Input
                   id="name"
                   autoComplete="name"
@@ -115,7 +117,7 @@ export default function AuthPage() {
             )}
             {isSignUp && (
               <div className="flex flex-col gap-2">
-                <Label htmlFor="referral-code">Referral code</Label>
+                <Label htmlFor="referral-code">{t("auth.referralCode")}</Label>
                 <Input
                   id="referral-code"
                   autoComplete="off"
@@ -127,12 +129,12 @@ export default function AuthPage() {
                   }
                 />
                 <p className="text-xs text-muted-foreground">
-                  Required after the first account has been created.
+                  {t("auth.referralHelp")}
                 </p>
               </div>
             )}
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("auth.email")}</Label>
               <Input
                 id="email"
                 type="email"
@@ -144,13 +146,13 @@ export default function AuthPage() {
             </div>
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t("auth.password")}</Label>
                 {!isSignUp && (
                   <Link
                     to="/forgot-password"
                     className="text-sm font-medium text-primary underline-offset-4 hover:underline"
                   >
-                    Forgot password?
+                    {t("auth.forgotPassword")}
                   </Link>
                 )}
               </div>
@@ -164,7 +166,7 @@ export default function AuthPage() {
                 required
               />
               {isSignUp && (
-                <p className="text-xs text-muted-foreground">At least 8 characters.</p>
+                <p className="text-xs text-muted-foreground">{t("auth.passwordHelp")}</p>
               )}
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
@@ -172,7 +174,7 @@ export default function AuthPage() {
               {isSubmitting && (
                 <Loader2 data-icon="inline-start" className="animate-spin" />
               )}
-              {isSignUp ? "Create account" : "Sign in"}
+              {isSignUp ? t("auth.createAccount") : t("auth.signIn")}
             </Button>
           </form>
         </CardContent>

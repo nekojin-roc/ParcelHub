@@ -10,6 +10,7 @@ import { adminUserRoutes } from "./routes/admin-users.js";
 import { auth } from "./auth.js";
 import { requireAuth } from "./utils/auth-guard.js";
 import { fromNodeHeaders } from "better-auth/node";
+import { ensureDefaultBin } from "./utils/default-bin.js";
 
 const app = Fastify({ logger: true });
 
@@ -20,6 +21,7 @@ await app.register(cors, {
 });
 await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
 await app.register(prismaPlugin);
+await ensureDefaultBin(app.prisma);
 
 const administratorCount = await app.prisma.user.count({
   where: { role: "ADMIN" },

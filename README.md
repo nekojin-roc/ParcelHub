@@ -155,6 +155,9 @@ Frontend translation keys and locale resources follow the conventions in
   images up to 5 MB; they can be replaced or deleted after registration.
   Files are stored outside the database and served only through authenticated
   package-photo endpoints. Set `UPLOAD_DIR` to choose a different storage root.
+- Every installation includes a permanent **Uncategorized** storage bin.
+  Packages submitted without a selected location are assigned to it
+  automatically; the system bin cannot be renamed or deleted.
 
 ## Host-side production commands
 

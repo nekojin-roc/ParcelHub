@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api, type Package } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -10,37 +11,41 @@ import {
 } from "@/components/ui/card";
 import { Archive, Clock, PackageCheck } from "lucide-react";
 
-const STATUS_DETAILS: Record<
-  Package["status"],
-  {
-    label: string;
-    description: string;
-    variant: "warning" | "default" | "success";
-  }
-> = {
+const STATUS_DETAILS = {
   RECEIVED: {
-    label: "Received",
-    description: "Your package has arrived and is being prepared for pickup.",
+    labelKey: "myPackages.status.received.label",
+    descriptionKey: "myPackages.status.received.description",
     variant: "warning",
   },
   NOTIFIED: {
-    label: "Ready for pickup",
-    description: "Your package is ready to be collected.",
+    labelKey: "myPackages.status.notified.label",
+    descriptionKey: "myPackages.status.notified.description",
     variant: "default",
   },
   PICKED_UP: {
-    label: "Picked up",
-    description: "This package has been collected.",
+    labelKey: "myPackages.status.pickedUp.label",
+    descriptionKey: "myPackages.status.pickedUp.description",
     variant: "success",
   },
-};
+} as const satisfies Record<
+  Package["status"],
+  {
+    labelKey: string;
+    descriptionKey: string;
+    variant: "warning" | "default" | "success";
+  }
+>;
 
-function formatDate(value: string | null | undefined): string {
+function formatDate(value: string | null | undefined, locale: string): string {
   if (!value) return "—";
-  return new Date(value).toLocaleString();
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
 }
 
 function UserPackageCard({ pkg }: { pkg: Package }) {
+  const { t, i18n } = useTranslation();
   const status = STATUS_DETAILS[pkg.status];
 
   return (
@@ -51,44 +56,56 @@ function UserPackageCard({ pkg }: { pkg: Package }) {
             <CardTitle className="truncate font-mono text-base">
               {pkg.barcode}
             </CardTitle>
-            <CardDescription>{status.description}</CardDescription>
+            <CardDescription>{t(status.descriptionKey)}</CardDescription>
           </div>
-          <Badge variant={status.variant}>{status.label}</Badge>
+          <Badge variant={status.variant}>{t(status.labelKey)}</Badge>
         </div>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 sm:flex-row">
         {pkg.photoPath && (
           <img
             src={api.packagePhotoUrl(pkg.id, pkg.photoPath)}
-            alt={`Package ${pkg.barcode}`}
+            alt={t("myPackages.photoAlt", { barcode: pkg.barcode })}
             className="h-36 w-full rounded-lg border object-cover sm:w-44"
           />
         )}
         <dl className="grid flex-1 gap-3 text-sm sm:grid-cols-2">
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground">Description</dt>
-            <dd className="font-medium">{pkg.description || "Package"}</dd>
+            <dt className="text-muted-foreground">{t("myPackages.fields.description")}</dt>
+            <dd className="font-medium">
+              {pkg.description || t("myPackages.packageFallback")}
+            </dd>
           </div>
           <div className="flex flex-col gap-1">
-            <dt className="text-muted-foreground">Received</dt>
-            <dd>{formatDate(pkg.receivedAt)}</dd>
+            <dt className="text-muted-foreground">{t("myPackages.fields.received")}</dt>
+            <dd>{formatDate(pkg.receivedAt, i18n.resolvedLanguage ?? i18n.language)}</dd>
           </div>
           {pkg.trackingNumber && (
             <div className="flex flex-col gap-1">
-              <dt className="text-muted-foreground">Tracking number</dt>
+              <dt className="text-muted-foreground">
+                {t("myPackages.fields.trackingNumber")}
+              </dt>
               <dd className="break-all font-mono">{pkg.trackingNumber}</dd>
             </div>
           )}
           {pkg.bin && pkg.status !== "PICKED_UP" && (
             <div className="flex flex-col gap-1">
-              <dt className="text-muted-foreground">Storage location</dt>
-              <dd>Bin {pkg.bin.label}</dd>
+              <dt className="text-muted-foreground">
+                {t("myPackages.fields.storageLocation")}
+              </dt>
+              <dd>
+                {t("packages.bin", {
+                  label: pkg.bin.isDefault
+                    ? t("common.storageBins.uncategorized.label")
+                    : pkg.bin.label,
+                })}
+              </dd>
             </div>
           )}
           {pkg.status === "PICKED_UP" && (
             <div className="flex flex-col gap-1">
-              <dt className="text-muted-foreground">Picked up</dt>
-              <dd>{formatDate(pkg.pickedUpAt)}</dd>
+              <dt className="text-muted-foreground">{t("myPackages.fields.pickedUp")}</dt>
+              <dd>{formatDate(pkg.pickedUpAt, i18n.resolvedLanguage ?? i18n.language)}</dd>
             </div>
           )}
         </dl>
@@ -98,6 +115,7 @@ function UserPackageCard({ pkg }: { pkg: Package }) {
 }
 
 export default function MyPackagesPage() {
+  const { t } = useTranslation();
   const { data, isLoading, error } = useQuery({
     queryKey: ["my-packages"],
     queryFn: api.myPackages,
@@ -107,7 +125,7 @@ export default function MyPackagesPage() {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center text-muted-foreground">
-        Loading your packages...
+        {t("myPackages.loading")}
       </div>
     );
   }
@@ -116,7 +134,7 @@ export default function MyPackagesPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Unable to load packages</CardTitle>
+          <CardTitle>{t("myPackages.errorTitle")}</CardTitle>
           <CardDescription>{error.message}</CardDescription>
         </CardHeader>
       </Card>
@@ -127,15 +145,14 @@ export default function MyPackagesPage() {
     return (
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">My Packages</h1>
-          <p className="text-muted-foreground">Track packages being held for you.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{t("myPackages.title")}</h1>
+          <p className="text-muted-foreground">{t("myPackages.description")}</p>
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>No recipient profile linked</CardTitle>
+            <CardTitle>{t("myPackages.noProfileTitle")}</CardTitle>
             <CardDescription>
-              Ask an administrator to link this account to your recipient
-              profile. Your packages will appear here after it is connected.
+              {t("myPackages.noProfileDescription")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -149,30 +166,30 @@ export default function MyPackagesPage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">My Packages</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("myPackages.title")}</h1>
         <p className="text-muted-foreground">
-          Package status for {data.recipient.name}.
+          {t("myPackages.recipientDescription", { name: data.recipient.name })}
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-sm">Waiting for pickup</CardTitle>
+            <CardTitle className="text-sm">{t("myPackages.metrics.waiting")}</CardTitle>
             <Clock className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-3xl font-bold">{currentPackages.length}</CardContent>
         </Card>
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-sm">Picked up</CardTitle>
+            <CardTitle className="text-sm">{t("myPackages.metrics.pickedUp")}</CardTitle>
             <PackageCheck className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-3xl font-bold">{pickupHistory.length}</CardContent>
         </Card>
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-sm">Total packages</CardTitle>
+            <CardTitle className="text-sm">{t("myPackages.metrics.total")}</CardTitle>
             <Archive className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="text-3xl font-bold">{data.packages.length}</CardContent>
@@ -180,13 +197,13 @@ export default function MyPackagesPage() {
       </div>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">Current packages</h2>
+        <h2 className="text-lg font-semibold">{t("myPackages.sections.current")}</h2>
         {currentPackages.length ? (
           currentPackages.map((pkg) => <UserPackageCard key={pkg.id} pkg={pkg} />)
         ) : (
           <Card>
             <CardContent className="py-10 text-center text-muted-foreground">
-              You have no packages waiting for pickup.
+              {t("myPackages.sections.empty")}
             </CardContent>
           </Card>
         )}
@@ -194,7 +211,7 @@ export default function MyPackagesPage() {
 
       {pickupHistory.length > 0 && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold">Pickup history</h2>
+          <h2 className="text-lg font-semibold">{t("myPackages.sections.history")}</h2>
           {pickupHistory.map((pkg) => (
             <UserPackageCard key={pkg.id} pkg={pkg} />
           ))}

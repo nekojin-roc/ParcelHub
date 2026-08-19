@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { api, type Recipient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
 import { Plus, Loader2, Trash2, UserRound } from "lucide-react";
 
 export default function RecipientsPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -65,17 +67,17 @@ export default function RecipientsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Recipients</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t("recipients.title")}</h1>
           <p className="text-muted-foreground">
-            Manage the friends who receive packages at your address.
+            {t("recipients.description")}
           </p>
         </div>
         <Button onClick={() => setDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Recipient
+          <Plus data-icon="inline-start" />
+          {t("recipients.add")}
         </Button>
       </div>
 
@@ -86,11 +88,11 @@ export default function RecipientsPage() {
       )}
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div className="text-center py-12 text-muted-foreground">{t("common.status.loading")}</div>
       ) : !recipients?.length ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
-            No recipients yet. Add your first friend to get started.
+            {t("recipients.empty")}
           </CardContent>
         </Card>
       ) : (
@@ -118,11 +120,12 @@ export default function RecipientsPage() {
                     }
                     onClick={() => {
                       setDeleteError(null);
-                      if (confirm(`Delete ${r.name}?`)) {
+                      if (confirm(t("recipients.confirmDelete", { name: r.name }))) {
                         deleteMutation.mutate(r.id);
                       }
                     }}
                   >
+                    <span className="sr-only">{t("recipients.deleteLabel", { name: r.name })}</span>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
@@ -137,7 +140,7 @@ export default function RecipientsPage() {
                 {r._count && (
                   <div className="mt-3">
                     <Badge variant="secondary">
-                      {r._count.packages} {r._count.packages === 1 ? "package" : "packages"} total
+                      {t("recipients.packageCount", { count: r._count.packages })}
                     </Badge>
                   </div>
                 )}
@@ -151,43 +154,43 @@ export default function RecipientsPage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Recipient</DialogTitle>
+            <DialogTitle>{t("recipients.dialog.title")}</DialogTitle>
             <DialogDescription>
-              Add a friend who receives packages at your address.
+              {t("recipients.dialog.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label>Name *</Label>
+              <Label>{t("recipients.dialog.nameLabel")}</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Full name"
+                placeholder={t("recipients.dialog.namePlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Email *</Label>
+              <Label>{t("recipients.dialog.emailLabel")}</Label>
               <Input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@example.com"
+                placeholder={t("recipients.dialog.emailPlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Phone</Label>
+              <Label>{t("recipients.dialog.phoneLabel")}</Label>
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+81-90-..."
+                placeholder={t("recipients.dialog.phonePlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Notes</Label>
+              <Label>{t("recipients.dialog.notesLabel")}</Label>
               <Input
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="e.g. prefers weekend pickup"
+                placeholder={t("recipients.dialog.notesPlaceholder")}
               />
             </div>
           </div>
@@ -198,16 +201,16 @@ export default function RecipientsPage() {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              {t("common.actions.cancel")}
             </Button>
             <Button
               onClick={handleCreate}
               disabled={!name || !email || createMutation.isPending}
             >
               {createMutation.isPending && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 data-icon="inline-start" className="animate-spin" />
               )}
-              Add Recipient
+              {t("recipients.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
