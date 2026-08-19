@@ -18,6 +18,41 @@ All files are currently in the root directory. The intended architecture (per RE
 
 ## Commands
 
+### Required local lifecycle scripts
+
+The following scripts are machine-local and intentionally ignored by Git, but
+they live under `scripts/` in this working copy:
+
+```bash
+# Start Mailpit when Docker is available, migrate the database, and run the
+# backend plus frontend development servers.
+./scripts/run-local.sh
+
+# Back up the current SQLite database and uploads, then create a migrated,
+# completely empty local database. Interactive use requires typing RESET.
+./scripts/start-clean-db.sh
+
+# Non-interactive confirmation, only after the user explicitly requests a new
+# or clean database.
+./scripts/start-clean-db.sh --yes
+```
+
+Whenever the user asks to **run/start ParcelHub**, use
+`./scripts/run-local.sh`; do not assemble separate backend/frontend commands.
+Whenever the user asks to **start, spin up, reset, or create a clean/new local
+database**, use `./scripts/start-clean-db.sh --yes`. A direct user request for a
+clean/new database authorizes that reset; otherwise never pass `--yes` or reset
+the database. Do not seed after a clean reset unless the user separately asks
+for sample data.
+
+The run script records its child processes in `.parcelhub-dev.pids`, prevents a
+duplicate launch, and cleans both servers up when it receives an interrupt. The
+clean-database script refuses to run while that process file or the configured
+backend port indicates a running server. Its pre-reset snapshots are written to
+the ignored `backups/` directory.
+
+### Individual commands
+
 ```bash
 # Backend dev server (port 3001)
 npm run dev          # tsx watch src/index.ts
@@ -29,7 +64,7 @@ npm run build        # tsc
 npm start
 
 # Database
-npm run db:push      # prisma db push (create/sync schema)
+npm run db:migrate:deploy # apply committed migrations
 npm run db:seed      # tsx prisma/seed.ts
 npm run db:studio    # prisma studio (web UI)
 ```

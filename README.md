@@ -114,7 +114,7 @@ register without a referral code.
 
 | Layer            | Technology                                      |
 | ---------------- | ----------------------------------------------- |
-| Frontend         | React 19, TypeScript, Vite, shadcn/ui, Tailwind |
+| Frontend         | React 19, TypeScript, Vite, shadcn/ui, Tailwind, i18next |
 | Backend          | Fastify, TypeScript                             |
 | Database         | SQLite via Prisma ORM                           |
 | Email            | Nodemailer; Mailpit for local development       |
@@ -122,6 +122,9 @@ register without a referral code.
 | Barcode Generate | bwip-js                                         |
 | Barcode Scan     | html5-qrcode (camera), HID mode (USB scanner)   |
 | Package Photos   | Private local files in `uploads/packages/`       |
+
+Frontend translation keys and locale resources follow the conventions in
+[`docs/i18n.md`](docs/i18n.md).
 
 ## Key Concepts
 

@@ -5,4 +5,11 @@ prisma/prisma/*.db*
 *.db
 *.db-journal
 uploads/
+backups/
 *.tsbuildinfo
+
+# Local lifecycle helpers and runtime state. Their required paths and usage are
+# documented in AGENTS.md, but the scripts are intentionally machine-local.
+scripts/run-local.sh
+scripts/start-clean-db.sh
+.parcelhub-dev.pids

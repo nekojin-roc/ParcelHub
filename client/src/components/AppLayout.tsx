@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   PackagePlus,
@@ -16,20 +17,21 @@ import { Badge } from "@/components/ui/badge";
 import { authClient, getUserRole } from "@/lib/auth-client";
 
 const adminNavItems = [
-  { to: "/", icon: LayoutDashboard, label: "Dashboard" },
-  { to: "/intake", icon: PackagePlus, label: "Intake" },
-  { to: "/pickup", icon: ScanBarcode, label: "Pickup" },
-  { to: "/packages", icon: Archive, label: "Packages" },
-  { to: "/recipients", icon: Users, label: "Recipients" },
-  { to: "/users", icon: UserRoundCog, label: "Users" },
-  { to: "/settings", icon: Settings, label: "Settings" },
-];
+  { to: "/", icon: LayoutDashboard, labelKey: "navigation.dashboard" },
+  { to: "/intake", icon: PackagePlus, labelKey: "navigation.intake" },
+  { to: "/pickup", icon: ScanBarcode, labelKey: "navigation.pickup" },
+  { to: "/packages", icon: Archive, labelKey: "navigation.packages" },
+  { to: "/recipients", icon: Users, labelKey: "navigation.recipients" },
+  { to: "/users", icon: UserRoundCog, labelKey: "navigation.users" },
+  { to: "/settings", icon: Settings, labelKey: "navigation.settings" },
+] as const;
 
 const userNavItems = [
-  { to: "/my-packages", icon: PackageSearch, label: "My Packages" },
-];
+  { to: "/my-packages", icon: PackageSearch, labelKey: "navigation.myPackages" },
+] as const;
 
 export default function AppLayout() {
+  const { t } = useTranslation();
   const { data: session } = authClient.useSession();
   const role = getUserRole(session?.user.role);
   const navItems = role === "ADMIN" ? adminNavItems : userNavItems;
@@ -48,8 +50,8 @@ export default function AppLayout() {
             ParcelHub
           </span>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {navItems.map(({ to, icon: Icon, label }) => (
+        <nav className="flex flex-1 flex-col gap-1 p-3">
+          {navItems.map(({ to, icon: Icon, labelKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -63,8 +65,8 @@ export default function AppLayout() {
                 )
               }
             >
-              <Icon className="h-4 w-4" />
-              {label}
+              <Icon className="size-4" />
+              {t(labelKey)}
             </NavLink>
           ))}
         </nav>
@@ -73,7 +75,7 @@ export default function AppLayout() {
             <div className="flex items-center gap-2">
               <p className="truncate text-sm font-medium">{session?.user.name}</p>
               <Badge variant="secondary">
-                {role === "ADMIN" ? "Admin" : "User"}
+                {role === "ADMIN" ? t("common.roles.admin") : t("common.roles.user")}
               </Badge>
             </div>
             <p className="truncate text-xs text-muted-foreground">
@@ -82,7 +84,7 @@ export default function AppLayout() {
           </div>
           <Button variant="ghost" className="justify-start" onClick={signOut}>
             <LogOut data-icon="inline-start" />
-            Sign out
+            {t("common.actions.signOut")}
           </Button>
         </div>
       </aside>
@@ -93,7 +95,7 @@ export default function AppLayout() {
           <span className="text-lg font-bold tracking-tight shrink-0">
             ParcelHub
           </span>
-          {navItems.map(({ to, icon: Icon, label }) => (
+          {navItems.map(({ to, icon: Icon, labelKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -107,13 +109,13 @@ export default function AppLayout() {
                 )
               }
             >
-              <Icon className="h-3.5 w-3.5" />
-              {label}
+              <Icon className="size-3.5" />
+              {t(labelKey)}
             </NavLink>
           ))}
           <Button variant="ghost" size="sm" className="ml-auto shrink-0" onClick={signOut}>
             <LogOut data-icon="inline-start" />
-            Sign out
+            {t("common.actions.signOut")}
           </Button>
         </header>
 
