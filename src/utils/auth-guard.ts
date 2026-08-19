@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "../auth.js";
+import { prisma } from "./prisma.js";
 
 export type UserRole = "ADMIN" | "USER";
 
@@ -32,6 +33,15 @@ export async function requireAuth(
 
   if (!session) {
     await reply.status(401).send({ error: "Authentication required" });
+    return false;
+  }
+
+  const account = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { disabledAt: true },
+  });
+  if (account?.disabledAt) {
+    await reply.status(403).send({ error: "Account disabled" });
     return false;
   }
 

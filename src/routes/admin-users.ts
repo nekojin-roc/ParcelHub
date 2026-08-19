@@ -17,6 +17,7 @@ export async function adminUserRoutes(app: FastifyInstance) {
     return app.prisma.referralCode.findMany({
       where: {
         usedAt: null,
+        revokedAt: null,
         usedBy: null,
       },
       orderBy: { createdAt: "desc" },

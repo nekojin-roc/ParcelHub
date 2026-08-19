@@ -23,12 +23,12 @@ export class PackagePhotoError extends Error {
   }
 }
 
-function photoDirectory(): string {
+export function packagePhotoDirectory(): string {
   return path.resolve(process.env.UPLOAD_DIR ?? "uploads", "packages");
 }
 
 async function ensurePhotoDirectory(): Promise<string> {
-  const directory = photoDirectory();
+  const directory = packagePhotoDirectory();
   await mkdir(directory, { recursive: true });
   return directory;
 }
@@ -70,7 +70,7 @@ export async function removePackagePhoto(filename: string): Promise<void> {
   if (path.basename(filename) !== filename) return;
 
   try {
-    await unlink(path.join(photoDirectory(), filename));
+    await unlink(path.join(packagePhotoDirectory(), filename));
   } catch (error: unknown) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
   }
@@ -84,7 +84,7 @@ export async function getPackagePhoto(filename: string): Promise<{
     throw new PackagePhotoError("Photo not found", 404);
   }
 
-  const filePath = path.join(photoDirectory(), filename);
+  const filePath = path.join(packagePhotoDirectory(), filename);
   try {
     await access(filePath);
   } catch {

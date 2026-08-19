@@ -83,6 +83,7 @@ export const auth = betterAuth({
               where: {
                 code: referralCode,
                 usedAt: null,
+                revokedAt: null,
                 usedBy: null,
               },
               select: { id: true },
@@ -98,7 +99,9 @@ export const auth = betterAuth({
           return {
             data: {
               ...user,
-              role: isFirstAccount ? "ADMIN" : "USER",
+              // Public registration never grants administrative access. The
+              // host operator must explicitly promote an existing account.
+              role: "USER",
               referralCode: isFirstAccount ? null : referralCode,
             },
           };
@@ -122,23 +125,22 @@ export const auth = betterAuth({
         },
       },
     },
+    session: {
+      create: {
+        before: async (session) => {
+          const user = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: { disabledAt: true },
+          });
+          if (user?.disabledAt) {
+            throw APIError.from("FORBIDDEN", {
+              code: "ACCOUNT_DISABLED",
+              message: "This account has been disabled",
+            });
+          }
+          return { data: session };
+        },
+      },
+    },
   },
 });
-
-// When roles are introduced to an installation that already has accounts,
-// retain access by promoting the oldest account if no admin exists yet.
-export async function ensureAdminExists(): Promise<void> {
-  const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
-  if (adminCount > 0) return;
-
-  const oldestUser = await prisma.user.findFirst({
-    orderBy: { createdAt: "asc" },
-    select: { id: true },
-  });
-  if (oldestUser) {
-    await prisma.user.update({
-      where: { id: oldestUser.id },
-      data: { role: "ADMIN" },
-    });
-  }
-}

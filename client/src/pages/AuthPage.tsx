@@ -62,7 +62,7 @@ export default function AuthPage() {
           <CardTitle>ParcelHub</CardTitle>
           <CardDescription>
             {isSignUp
-              ? "The first account is an administrator; later accounts see only their packages."
+              ? "Administrators are promoted by the host; users see only their linked packages."
               : "Sign in to manage packages and pickups."}
           </CardDescription>
         </CardHeader>
@@ -127,7 +127,7 @@ export default function AuthPage() {
                   }
                 />
                 <p className="text-xs text-muted-foreground">
-                  Required unless this is the first administrator account.
+                  Required after the first account has been created.
                 </p>
               </div>
             )}

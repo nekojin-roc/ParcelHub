@@ -7,7 +7,7 @@ import { packageRoutes } from "./routes/packages.js";
 import { binRoutes } from "./routes/bins.js";
 import { userRoutes } from "./routes/user.js";
 import { adminUserRoutes } from "./routes/admin-users.js";
-import { auth, ensureAdminExists } from "./auth.js";
+import { auth } from "./auth.js";
 import { requireAuth } from "./utils/auth-guard.js";
 import { fromNodeHeaders } from "better-auth/node";
 
@@ -20,7 +20,15 @@ await app.register(cors, {
 });
 await app.register(multipart, { limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
 await app.register(prismaPlugin);
-await ensureAdminExists();
+
+const administratorCount = await app.prisma.user.count({
+  where: { role: "ADMIN" },
+});
+if (administratorCount === 0) {
+  app.log.warn(
+    "No administrator account exists. Promote a verified user with the host-side admin:promote command."
+  );
+}
 
 // Better Auth exposes its email/password and session endpoints here.  The
 // adapter expects Fetch API Request/Response objects, so bridge Fastify's

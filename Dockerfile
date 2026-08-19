@@ -8,5 +8,6 @@ RUN npx prisma generate
 COPY . .
 RUN npx tsc
 
+ENV NODE_ENV=production
 EXPOSE 3001
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "npm run db:migrate:deploy && exec npm start"]

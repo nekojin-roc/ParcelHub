@@ -1,20 +1,22 @@
-version: "3.8"
-
 services:
   server:
-    build: ./server
+    build: .
     ports:
       - "3001:3001"
     volumes:
-      - db-data:/app/prisma
+      - db-data:/app/data
       - uploads:/app/uploads
     env_file:
-      - ./server/.env
+      - ./.env
     environment:
-      - DATABASE_URL=file:/app/prisma/parcel-hub.db
+      - DATABASE_URL=file:/app/data/parcel-hub.db
+      - UPLOAD_DIR=/app/uploads
+      - NODE_ENV=production
 
   client:
-    build: ./client
+    build:
+      context: .
+      dockerfile: client/Dockerfile
     ports:
       - "5173:80"
     depends_on:

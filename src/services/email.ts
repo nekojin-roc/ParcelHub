@@ -42,6 +42,25 @@ async function sendMail(options: {
   });
 }
 
+export async function verifyEmailTransport(): Promise<void> {
+  await transporter.verify();
+}
+
+export async function sendTestEmail(recipientEmail: string): Promise<void> {
+  const sentAt = new Date().toISOString();
+  await sendMail({
+    to: recipientEmail,
+    subject: "ParcelHub SMTP test",
+    html: `
+      <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
+        <h2>ParcelHub SMTP test succeeded</h2>
+        <p>This message was sent by the host-side mail:test command.</p>
+        <p style="color: #666; font-size: 14px;">Sent at ${escapeHtml(sentAt)}</p>
+      </div>
+    `,
+  });
+}
+
 export async function sendEmailVerification(params: {
   name: string;
   email: string;
