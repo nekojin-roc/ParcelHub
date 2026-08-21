@@ -160,7 +160,7 @@ export async function sendArrivalNotification(
         ${safeBinLabel ? `<tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Stored in</td><td style="padding: 8px; border-bottom: 1px solid #eee;">Bin ${safeBinLabel}</td></tr>` : ""}
       </table>
       <p style="color: #666; font-size: 14px;">
-        Please arrange pickup at your earliest convenience.
+        Please arrange outbound processing at your earliest convenience.
       </p>
     </div>
   `;
@@ -191,20 +191,20 @@ export async function sendPickupConfirmation(params: {
     : null;
   const html = `
     <div style="font-family: sans-serif; max-width: 500px; margin: 0 auto;">
-      <h2>Package picked up</h2>
-      <p>Hi ${recipientName}, your package <strong>${packageBarcode}</strong> has been collected${collectedBy ? ` by ${collectedBy}` : ""}.</p>
+      <h2>Outbound complete</h2>
+      <p>Hi ${recipientName}, your package <strong>${packageBarcode}</strong> has completed outbound processing${collectedBy ? ` and was released to ${collectedBy}` : ""}.</p>
     </div>
   `;
 
   try {
     await sendMail({
       to: params.recipientEmail,
-      subject: `Package collected [${params.packageBarcode}]`,
+      subject: `Package outbound complete [${params.packageBarcode}]`,
       html,
     });
     return true;
   } catch (err) {
-    console.error("Failed to send pickup email:", err);
+    console.error("Failed to send outbound email:", err);
     return false;
   }
 }

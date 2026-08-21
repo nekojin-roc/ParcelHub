@@ -7,7 +7,7 @@ const fr = {
       close: "Fermer",
       signOut: "Se déconnecter",
     },
-    packageStatus: { received: "Reçu", notified: "Notifié", pickedUp: "Retiré" },
+    packageStatus: { received: "Reçu", notified: "Notifié", pickedUp: "Sorti" },
     storageBins: {
       uncategorized: {
         label: "Non classé",
@@ -40,7 +40,7 @@ const fr = {
     intake: "Réception",
     myPackages: "Mes colis",
     packages: "Colis",
-    pickup: "Retrait",
+    pickup: "Sortie",
     recipients: "Destinataires",
     settings: "Paramètres",
     users: "Utilisateurs",
@@ -49,20 +49,20 @@ const fr = {
     title: "Tableau de bord",
     description: "Vue d’ensemble des colis actuellement sous votre garde.",
     metrics: {
-      waitingForPickup: "En attente de retrait",
-      pickedUp: "Retirés",
+      waitingForPickup: "En attente de sortie",
+      pickedUp: "Sortis",
       totalPackages: "Total des colis",
       recipients: "Destinataires",
     },
     awaitingPickup: {
-      title: "Colis en attente de retrait",
+      title: "Colis en attente de sortie",
       packageCount_one: "{{count}} colis",
       packageCount_other: "{{count}} colis",
     },
-    empty: "Aucun colis en attente. Tout est en ordre !",
+    empty: "Aucun colis en attente de sortie. Tout est en ordre !",
   },
   auth: {
-    signInDescription: "Connectez-vous pour gérer les colis et les retraits.", signUpDescription: "Les administrateurs sont promus par l’hôte ; les utilisateurs ne voient que les colis qui leur sont associés.",
+    signInDescription: "Connectez-vous pour gérer les entrées et sorties de colis.", signUpDescription: "Les administrateurs sont promus par l’hôte ; les utilisateurs ne voient que les colis qui leur sont associés.",
     signIn: "Se connecter", createAccount: "Créer un compte", verificationSuccess: "Votre adresse e-mail a été vérifiée. Vous pouvez vous connecter normalement.",
     verificationError: "Ce lien de vérification est invalide ou a expiré.", name: "Nom", referralCode: "Code de parrainage",
     referralHelp: "Obligatoire après la création du premier compte.", email: "E-mail", password: "Mot de passe", forgotPassword: "Mot de passe oublié ?",
@@ -82,14 +82,14 @@ const fr = {
     title: "Mes colis", description: "Suivez les colis conservés pour vous.", recipientDescription: "État des colis de {{name}}.",
     loading: "Chargement de vos colis…", errorTitle: "Impossible de charger les colis", noProfileTitle: "Aucun profil de destinataire associé",
     noProfileDescription: "Demandez à un administrateur d’associer ce compte à votre profil de destinataire. Vos colis apparaîtront ici une fois l’association effectuée.",
-    metrics: { waiting: "En attente de retrait", pickedUp: "Retirés", total: "Total des colis" },
-    sections: { current: "Colis actuels", history: "Historique des retraits", empty: "Vous n’avez aucun colis en attente de retrait." },
+    metrics: { waiting: "En attente de sortie", pickedUp: "Sortis", total: "Total des colis" },
+    sections: { current: "Colis actuels", history: "Historique des sorties", empty: "Vous n’avez aucun colis en attente de sortie." },
     status: {
-      received: { label: "Reçu", description: "Votre colis est arrivé et sa mise à disposition est en cours." },
-      notified: { label: "Prêt à retirer", description: "Votre colis est prêt à être retiré." },
-      pickedUp: { label: "Retiré", description: "Ce colis a été retiré." },
+      received: { label: "Reçu", description: "Votre colis est arrivé et se prépare pour sa sortie." },
+      notified: { label: "Prêt pour la sortie", description: "Votre colis est prêt pour sa sortie." },
+      pickedUp: { label: "Sorti", description: "Ce colis est sorti." },
     },
-    fields: { description: "Description", received: "Reçu", trackingNumber: "Numéro de suivi", storageLocation: "Emplacement de stockage", pickedUp: "Retiré" },
+    fields: { description: "Description", received: "Reçu", trackingNumber: "Numéro de suivi", storageLocation: "Emplacement de stockage", pickedUp: "Sorti le" },
     packageFallback: "Colis", photoAlt: "Colis {{barcode}}",
   },
   intake: {
@@ -125,26 +125,26 @@ const fr = {
     printWindowTitle: "Étiquette : {{barcode}}",
   },
   pickup: {
-    title: "Retrait d’un colis", description: "Scannez ou saisissez un code-barres pour marquer un colis comme retiré.",
+    title: "Sortie d’un colis", description: "Scannez ou saisissez un code-barres pour marquer un colis comme sorti.",
     modes: { manual: "Manuel / Scanner", camera: "Caméra" },
     scanner: {
       barcodeLabel: "Code-barres", placeholder: "Scanner ou saisir le code-barres…", submitLabel: "Rechercher le code-barres",
       tip: "Astuce : les scanners USB saisissent directement dans ce champ. Il suffit de scanner !", cameraTip: "Pointez la caméra vers l’étiquette à code-barres.",
     },
     confirm: {
-      title: "Confirmer le retrait", description: "Vérifiez les détails avant de marquer le colis comme retiré.", barcode: "Code-barres", recipient: "Destinataire",
-      packageDescription: "Description", bin: "Bac", received: "Reçu le", collectedBy: "Retiré par (facultatif)",
-      collectedByPlaceholder: "Nom de la personne qui retire le colis", action: "Confirmer le retrait",
+      title: "Confirmer la sortie", description: "Vérifiez les détails avant de marquer le colis comme sorti.", barcode: "Code-barres", recipient: "Destinataire",
+      packageDescription: "Description", bin: "Bac", received: "Reçu le", collectedBy: "Remis à (facultatif)",
+      collectedByPlaceholder: "Nom de la personne à qui le colis est remis", action: "Confirmer la sortie",
     },
-    success: { title: "Colis retiré", description: "Le colis {{barcode}} de {{recipientName}} a été marqué comme retiré.", scanNext: "Scanner le suivant" },
+    success: { title: "Colis sorti", description: "Le colis {{barcode}} de {{recipientName}} a été marqué comme sorti.", scanNext: "Scanner le suivant" },
     errors: {
-      notFound: "Aucun colis trouvé avec le code-barres « {{barcode}} ».", alreadyPickedUp: "Ce colis a déjà été retiré le {{date}}.",
+      notFound: "Aucun colis trouvé avec le code-barres « {{barcode}} ».", alreadyPickedUp: "Ce colis est déjà sorti le {{date}}.",
       lookupFailed: "Échec de la recherche", camera: "Impossible d’accéder à la caméra. Vérifiez les autorisations.",
     },
   },
   packages: {
     title: "Colis", description: "Consultez et recherchez tous les colis enregistrés.", searchPlaceholder: "Rechercher un code-barres, une description, une commande…",
-    filters: { active: "Actifs (en attente)", all: "Tous" }, empty: "Aucun colis trouvé.", noDescription: "Aucune description",
+    filters: { active: "Actifs (en attente de sortie)", all: "Tous" }, empty: "Aucun colis trouvé.", noDescription: "Aucune description",
     orderNumber: "Commande : {{orderNumber}}", bin: "Bac {{label}}",
   },
   recipients: {
@@ -154,7 +154,7 @@ const fr = {
     dialog: {
       title: "Ajouter un destinataire", description: "Ajoutez un ami qui reçoit des colis à votre adresse.", nameLabel: "Nom *", namePlaceholder: "Nom complet",
       emailLabel: "E-mail *", emailPlaceholder: "email@example.com", phoneLabel: "Téléphone", phonePlaceholder: "+81-90-…",
-      notesLabel: "Notes", notesPlaceholder: "ex. préfère un retrait le week-end",
+      notesLabel: "Notes", notesPlaceholder: "ex. préfère une sortie le week-end",
     },
   },
   users: {

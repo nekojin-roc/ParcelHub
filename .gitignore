@@ -7,6 +7,7 @@ prisma/prisma/*.db*
 uploads/
 backups/
 *.tsbuildinfo
+.DS_Store
 
 # Local lifecycle helpers and runtime state. Their required paths and usage are
 # documented in AGENTS.md, but the scripts are intentionally machine-local.

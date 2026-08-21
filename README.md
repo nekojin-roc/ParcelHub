@@ -132,7 +132,7 @@ Frontend translation keys and locale resources follow the conventions in
 - **Packages**: Individual items received, each assigned a unique barcode.
 - **Bins**: Storage locations in your home (shelves, boxes, etc.).
 - **Intake**: The process of logging a new package and notifying the recipient.
-- **Pickup**: Scanning a barcode to mark a package as collected.
+- **Outbound**: Scanning a barcode to complete outbound package processing.
 
 ## Authentication and photos
 
@@ -146,7 +146,7 @@ Frontend translation keys and locale resources follow the conventions in
 - Account creation sends a one-time verification email, but verification is
   not required for sign-in. The sign-in page also provides a password-reset
   flow; completing it revokes the account's existing sessions.
-- Administrators use the operational dashboard, intake, pickup, recipient,
+- Administrators use the operational dashboard, intake, outbound, recipient,
   user, package, and settings pages. The **Registered Users** page links each
   account to one recipient profile. Normal users are redirected to **My
   Packages**, where they can read package status and photos only for their

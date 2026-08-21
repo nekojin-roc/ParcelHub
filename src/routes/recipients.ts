@@ -71,7 +71,7 @@ export async function recipientRoutes(app: FastifyInstance) {
     }
   );
 
-  // Delete recipient only when every package has already been picked up.
+  // Delete recipient only when every package has completed outbound processing.
   app.delete<{ Params: { id: string } }>(
     "/api/recipients/:id",
     async (request, reply) => {

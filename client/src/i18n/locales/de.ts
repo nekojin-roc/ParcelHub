@@ -7,7 +7,7 @@ const de = {
       close: "Schließen",
       signOut: "Abmelden",
     },
-    packageStatus: { received: "Eingegangen", notified: "Benachrichtigt", pickedUp: "Abgeholt" },
+    packageStatus: { received: "Eingegangen", notified: "Benachrichtigt", pickedUp: "Ausgegeben" },
     storageBins: {
       uncategorized: {
         label: "Nicht kategorisiert",
@@ -40,7 +40,7 @@ const de = {
     intake: "Annahme",
     myPackages: "Meine Pakete",
     packages: "Pakete",
-    pickup: "Abholung",
+    pickup: "Warenausgang",
     recipients: "Empfänger",
     settings: "Einstellungen",
     users: "Benutzer",
@@ -49,20 +49,20 @@ const de = {
     title: "Übersicht",
     description: "Übersicht der Pakete, die sich derzeit in Ihrer Obhut befinden.",
     metrics: {
-      waitingForPickup: "Wartet auf Abholung",
-      pickedUp: "Abgeholt",
+      waitingForPickup: "Wartet auf Warenausgang",
+      pickedUp: "Ausgegeben",
       totalPackages: "Pakete insgesamt",
       recipients: "Empfänger",
     },
     awaitingPickup: {
-      title: "Zur Abholung bereite Pakete",
+      title: "Pakete vor dem Warenausgang",
       packageCount_one: "{{count}} Paket",
       packageCount_other: "{{count}} Pakete",
     },
-    empty: "Keine Pakete warten auf Abholung. Alles erledigt!",
+    empty: "Keine Pakete warten auf den Warenausgang. Alles erledigt!",
   },
   auth: {
-    signInDescription: "Melden Sie sich an, um Pakete und Abholungen zu verwalten.", signUpDescription: "Administratoren werden vom Host ernannt; Benutzer sehen nur die mit ihnen verknüpften Pakete.",
+    signInDescription: "Melden Sie sich an, um Paketannahme und Warenausgang zu verwalten.", signUpDescription: "Administratoren werden vom Host ernannt; Benutzer sehen nur die mit ihnen verknüpften Pakete.",
     signIn: "Anmelden", createAccount: "Konto erstellen", verificationSuccess: "Ihre E-Mail-Adresse wurde bestätigt. Sie können sich jetzt anmelden.",
     verificationError: "Dieser Bestätigungslink ist ungültig oder abgelaufen.", name: "Name", referralCode: "Empfehlungscode",
     referralHelp: "Nach Erstellung des ersten Kontos erforderlich.", email: "E-Mail", password: "Passwort", forgotPassword: "Passwort vergessen?",
@@ -82,14 +82,14 @@ const de = {
     title: "Meine Pakete", description: "Verfolgen Sie die für Sie aufbewahrten Pakete.", recipientDescription: "Paketstatus für {{name}}.",
     loading: "Ihre Pakete werden geladen…", errorTitle: "Pakete konnten nicht geladen werden", noProfileTitle: "Kein Empfängerprofil verknüpft",
     noProfileDescription: "Bitten Sie einen Administrator, dieses Konto mit Ihrem Empfängerprofil zu verknüpfen. Danach erscheinen Ihre Pakete hier.",
-    metrics: { waiting: "Wartet auf Abholung", pickedUp: "Abgeholt", total: "Pakete insgesamt" },
-    sections: { current: "Aktuelle Pakete", history: "Abholverlauf", empty: "Sie haben keine Pakete, die auf Abholung warten." },
+    metrics: { waiting: "Wartet auf Warenausgang", pickedUp: "Ausgegeben", total: "Pakete insgesamt" },
+    sections: { current: "Aktuelle Pakete", history: "Ausgangsverlauf", empty: "Sie haben keine Pakete, die auf den Warenausgang warten." },
     status: {
-      received: { label: "Eingegangen", description: "Ihr Paket ist angekommen und wird für die Abholung vorbereitet." },
-      notified: { label: "Abholbereit", description: "Ihr Paket kann abgeholt werden." },
-      pickedUp: { label: "Abgeholt", description: "Dieses Paket wurde abgeholt." },
+      received: { label: "Eingegangen", description: "Ihr Paket ist angekommen und wird für den Warenausgang vorbereitet." },
+      notified: { label: "Ausgangsbereit", description: "Ihr Paket ist für den Warenausgang bereit." },
+      pickedUp: { label: "Ausgegeben", description: "Dieses Paket wurde ausgegeben." },
     },
-    fields: { description: "Beschreibung", received: "Eingegangen", trackingNumber: "Sendungsnummer", storageLocation: "Lagerort", pickedUp: "Abgeholt" },
+    fields: { description: "Beschreibung", received: "Eingegangen", trackingNumber: "Sendungsnummer", storageLocation: "Lagerort", pickedUp: "Ausgegeben am" },
     packageFallback: "Paket", photoAlt: "Paket {{barcode}}",
   },
   intake: {
@@ -125,26 +125,26 @@ const de = {
     printWindowTitle: "Etikett: {{barcode}}",
   },
   pickup: {
-    title: "Paketabholung", description: "Scannen oder geben Sie einen Barcode ein, um ein Paket als abgeholt zu markieren.",
+    title: "Paketausgang", description: "Scannen oder geben Sie einen Barcode ein, um ein Paket als ausgegeben zu markieren.",
     modes: { manual: "Manuell / Scanner", camera: "Kamera" },
     scanner: {
       barcodeLabel: "Barcode", placeholder: "Barcode scannen oder eingeben…", submitLabel: "Barcode suchen",
       tip: "Tipp: USB-Barcodescanner geben direkt in dieses Feld ein. Einfach scannen!", cameraTip: "Richten Sie die Kamera auf das Barcode-Etikett.",
     },
     confirm: {
-      title: "Abholung bestätigen", description: "Prüfen Sie die Details, bevor Sie das Paket als abgeholt markieren.", barcode: "Barcode", recipient: "Empfänger",
-      packageDescription: "Beschreibung", bin: "Lagerbox", received: "Eingegangen", collectedBy: "Abgeholt von (optional)",
-      collectedByPlaceholder: "Name der abholenden Person", action: "Abholung bestätigen",
+      title: "Ausgang bestätigen", description: "Prüfen Sie die Details, bevor Sie das Paket als ausgegeben markieren.", barcode: "Barcode", recipient: "Empfänger",
+      packageDescription: "Beschreibung", bin: "Lagerbox", received: "Eingegangen", collectedBy: "Ausgegeben an (optional)",
+      collectedByPlaceholder: "Name der empfangenden Person", action: "Ausgang bestätigen",
     },
-    success: { title: "Paket abgeholt", description: "{{barcode}} für {{recipientName}} wurde als abgeholt markiert.", scanNext: "Nächstes scannen" },
+    success: { title: "Paket ausgegeben", description: "{{barcode}} für {{recipientName}} wurde als ausgegeben markiert.", scanNext: "Nächstes scannen" },
     errors: {
-      notFound: "Kein Paket mit dem Barcode „{{barcode}}“ gefunden.", alreadyPickedUp: "Dieses Paket wurde bereits am {{date}} abgeholt.",
+      notFound: "Kein Paket mit dem Barcode „{{barcode}}“ gefunden.", alreadyPickedUp: "Dieses Paket wurde bereits am {{date}} ausgegeben.",
       lookupFailed: "Suche fehlgeschlagen", camera: "Kein Kamerazugriff. Prüfen Sie die Berechtigungen.",
     },
   },
   packages: {
     title: "Pakete", description: "Alle registrierten Pakete anzeigen und durchsuchen.", searchPlaceholder: "Barcode, Beschreibung oder Bestellung suchen…",
-    filters: { active: "Aktiv (wartend)", all: "Alle" }, empty: "Keine Pakete gefunden.", noDescription: "Keine Beschreibung",
+    filters: { active: "Aktiv (Ausgang ausstehend)", all: "Alle" }, empty: "Keine Pakete gefunden.", noDescription: "Keine Beschreibung",
     orderNumber: "Bestellung: {{orderNumber}}", bin: "Lagerbox {{label}}",
   },
   recipients: {
@@ -154,7 +154,7 @@ const de = {
     dialog: {
       title: "Empfänger hinzufügen", description: "Fügen Sie einen Freund hinzu, der Pakete an Ihrer Adresse erhält.", nameLabel: "Name *", namePlaceholder: "Vollständiger Name",
       emailLabel: "E-Mail *", emailPlaceholder: "email@example.com", phoneLabel: "Telefon", phonePlaceholder: "+81-90-…",
-      notesLabel: "Notizen", notesPlaceholder: "z. B. bevorzugt Abholung am Wochenende",
+      notesLabel: "Notizen", notesPlaceholder: "z. B. bevorzugt Ausgabe am Wochenende",
     },
   },
   users: {

@@ -7,7 +7,7 @@ const ja = {
       close: "閉じる",
       signOut: "ログアウト",
     },
-    packageStatus: { received: "受け取り済み", notified: "通知済み", pickedUp: "引き渡し済み" },
+    packageStatus: { received: "受付済み", notified: "通知済み", pickedUp: "出庫済み" },
     storageBins: {
       uncategorized: {
         label: "未分類",
@@ -40,7 +40,7 @@ const ja = {
     intake: "受付",
     myPackages: "自分の荷物",
     packages: "荷物",
-    pickup: "受け取り",
+    pickup: "出庫",
     recipients: "受取人",
     settings: "設定",
     users: "ユーザー",
@@ -49,20 +49,20 @@ const ja = {
     title: "ダッシュボード",
     description: "お預かり中の荷物の概要です。",
     metrics: {
-      waitingForPickup: "受け取り待ち",
-      pickedUp: "受け取り済み",
+      waitingForPickup: "出庫待ち",
+      pickedUp: "出庫済み",
       totalPackages: "荷物の合計",
       recipients: "受取人",
     },
     awaitingPickup: {
-      title: "受け取り待ちの荷物",
+      title: "出庫待ちの荷物",
       packageCount_one: "{{count}} 件の荷物",
       packageCount_other: "{{count}} 件の荷物",
     },
-    empty: "受け取り待ちの荷物はありません。すべて完了です！",
+    empty: "出庫待ちの荷物はありません。すべて完了です！",
   },
   auth: {
-    signInDescription: "ログインして荷物の受付と引き渡しを管理します。", signUpDescription: "管理者への昇格はホストが行います。一般ユーザーには関連付けられた荷物だけが表示されます。",
+    signInDescription: "ログインして荷物の受付と出庫を管理します。", signUpDescription: "管理者への昇格はホストが行います。一般ユーザーには関連付けられた荷物だけが表示されます。",
     signIn: "ログイン", createAccount: "アカウント作成", verificationSuccess: "メールアドレスを確認しました。通常どおりログインできます。",
     verificationError: "この確認リンクは無効か、有効期限が切れています。", name: "氏名", referralCode: "紹介コード",
     referralHelp: "最初のアカウント作成後は必須です。", email: "メールアドレス", password: "パスワード", forgotPassword: "パスワードを忘れた場合",
@@ -82,14 +82,14 @@ const ja = {
     title: "自分の荷物", description: "お預かり中の荷物を確認できます。", recipientDescription: "{{name}} さんの荷物の状況。",
     loading: "荷物を読み込み中…", errorTitle: "荷物を読み込めません", noProfileTitle: "受取人プロフィールが関連付けられていません",
     noProfileDescription: "管理者に依頼して、このアカウントを受取人プロフィールに関連付けてください。完了すると荷物がここに表示されます。",
-    metrics: { waiting: "受け取り待ち", pickedUp: "受け取り済み", total: "荷物の合計" },
-    sections: { current: "現在の荷物", history: "受け取り履歴", empty: "受け取り待ちの荷物はありません。" },
+    metrics: { waiting: "出庫待ち", pickedUp: "出庫済み", total: "荷物の合計" },
+    sections: { current: "現在の荷物", history: "出庫履歴", empty: "出庫待ちの荷物はありません。" },
     status: {
-      received: { label: "受付済み", description: "荷物が到着し、受け取りの準備をしています。" },
-      notified: { label: "受け取り可能", description: "荷物を受け取れます。" },
-      pickedUp: { label: "受け取り済み", description: "この荷物は受け取り済みです。" },
+      received: { label: "受付済み", description: "荷物が到着し、出庫の準備をしています。" },
+      notified: { label: "出庫可能", description: "荷物は出庫可能です。" },
+      pickedUp: { label: "出庫済み", description: "この荷物は出庫済みです。" },
     },
-    fields: { description: "説明", received: "受付日時", trackingNumber: "追跡番号", storageLocation: "保管場所", pickedUp: "受け取り日時" },
+    fields: { description: "説明", received: "受付日時", trackingNumber: "追跡番号", storageLocation: "保管場所", pickedUp: "出庫日時" },
     packageFallback: "荷物", photoAlt: "荷物 {{barcode}}",
   },
   intake: {
@@ -125,26 +125,26 @@ const ja = {
     printWindowTitle: "ラベル：{{barcode}}",
   },
   pickup: {
-    title: "荷物の引き渡し", description: "バーコードをスキャンまたは入力して、荷物を引き渡し済みにします。",
+    title: "荷物の出庫", description: "バーコードをスキャンまたは入力して、荷物を出庫済みにします。",
     modes: { manual: "手動 / スキャナー", camera: "カメラ" },
     scanner: {
       barcodeLabel: "バーコード", placeholder: "バーコードをスキャンまたは入力…", submitLabel: "バーコードを検索",
       tip: "ヒント：USB バーコードスキャナーはこの欄に直接入力します。そのままスキャンしてください。", cameraTip: "カメラをバーコードラベルに向けてください。",
     },
     confirm: {
-      title: "引き渡しの確認", description: "引き渡し済みにする前に詳細を確認してください。", barcode: "バーコード", recipient: "受取人",
-      packageDescription: "説明", bin: "保管ボックス", received: "受付日", collectedBy: "受取人名（任意）",
-      collectedByPlaceholder: "受け取りに来た人の名前", action: "引き渡しを確定",
+      title: "出庫の確認", description: "出庫済みにする前に詳細を確認してください。", barcode: "バーコード", recipient: "受取人",
+      packageDescription: "説明", bin: "保管ボックス", received: "受付日", collectedBy: "出庫先（任意）",
+      collectedByPlaceholder: "出庫先の名前", action: "出庫を確定",
     },
-    success: { title: "荷物を引き渡しました", description: "{{recipientName}} さんの {{barcode}} を引き渡し済みにしました。", scanNext: "次をスキャン" },
+    success: { title: "荷物を出庫しました", description: "{{recipientName}} さんの {{barcode}} を出庫済みにしました。", scanNext: "次をスキャン" },
     errors: {
-      notFound: "バーコード「{{barcode}}」の荷物が見つかりません。", alreadyPickedUp: "この荷物は {{date}} にすでに引き渡されています。",
+      notFound: "バーコード「{{barcode}}」の荷物が見つかりません。", alreadyPickedUp: "この荷物は {{date}} にすでに出庫されています。",
       lookupFailed: "検索に失敗しました", camera: "カメラにアクセスできません。権限を確認してください。",
     },
   },
   packages: {
     title: "荷物", description: "登録済みの荷物を表示・検索します。", searchPlaceholder: "バーコード、説明、注文番号を検索…",
-    filters: { active: "保管中（引き渡し待ち）", all: "すべて" }, empty: "荷物が見つかりません。", noDescription: "説明なし",
+    filters: { active: "保管中（出庫待ち）", all: "すべて" }, empty: "荷物が見つかりません。", noDescription: "説明なし",
     orderNumber: "注文：{{orderNumber}}", bin: "保管場所 {{label}}",
   },
   recipients: {
@@ -154,7 +154,7 @@ const ja = {
     dialog: {
       title: "受取人を追加", description: "この住所で荷物を受け取る友人を追加します。", nameLabel: "氏名 *", namePlaceholder: "氏名",
       emailLabel: "メールアドレス *", emailPlaceholder: "email@example.com", phoneLabel: "電話番号", phonePlaceholder: "+81-90-…",
-      notesLabel: "メモ", notesPlaceholder: "例：週末の受け取りを希望",
+      notesLabel: "メモ", notesPlaceholder: "例：週末の出庫を希望",
     },
   },
   users: {

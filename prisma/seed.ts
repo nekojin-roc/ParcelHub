@@ -31,7 +31,7 @@ async function main() {
       data: {
         name: "Alice Chen",
         email: "alice@example.com",
-        notes: "Prefers pickup on weekends",
+        notes: "Prefers weekend outbound handoff",
       },
     }),
     prisma.recipient.create({

@@ -241,7 +241,7 @@ export async function packageRoutes(app: FastifyInstance) {
     return reply.status(201).send(pkg);
   });
 
-  // Pickup: mark a package as collected by scanning its barcode
+  // Outbound: mark a package as processed by scanning its barcode.
   app.post<{ Params: { barcode: string } }>(
     "/api/packages/pickup/:barcode",
     async (request, reply) => {
@@ -255,7 +255,7 @@ export async function packageRoutes(app: FastifyInstance) {
       }
       if (pkg.status === "PICKED_UP") {
         return reply.status(409).send({
-          error: "Package already picked up",
+          error: "Package already processed outbound",
           pickedUpAt: pkg.pickedUpAt,
         });
       }
